@@ -12,11 +12,12 @@ RUN npm ci --only=production
 # Copy application code
 COPY . .
 
+# Verify critical files exist
+RUN test -f config/database.js || (echo "ERROR: database.js not found!" && exit 1)
+RUN test -f server.js || (echo "ERROR: server.js not found!" && exit 1)
+
 # Create uploads directory
 RUN mkdir -p uploads
-
-# Note: GCP service account key will be mounted as secret in Cloud Run
-# No need to copy it here as it will be available at runtime via secret mount
 
 # Expose port
 EXPOSE 8000
