@@ -38,9 +38,13 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
   customSiteTitle: 'Every Nation Education API Documentation'
 }));
 
-// Database connection
+// Database connection (non-blocking - don't wait for it)
 const connectDB = require('./config/database');
-connectDB();
+// Start connection but don't block server startup
+connectDB().catch(err => {
+  console.error('Initial database connection failed:', err.message);
+  console.log('Server will start anyway, database will retry in background');
+});
 
 // Import routes
 const indexRoutes = require('./routes/index.route');
@@ -50,7 +54,13 @@ app.use('/api/v2', indexRoutes);
 
 // Health check route
 app.get('/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Server is running' });
+  const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+  res.json({ 
+    status: 'OK', 
+    message: 'Server is running',
+    database: dbStatus,
+    timestamp: new Date().toISOString()
+  });
 });
 
 // Error handling middleware
@@ -77,11 +87,12 @@ setupUserAdminChatHandlers(io);
 
 const PORT = process.env.PORT || 8000;
 
-server.listen(PORT, () => {
+// Listen on 0.0.0.0 to accept connections from Cloud Run
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`Server is running on port ${PORT}`);
   console.log(`Socket.IO is ready for real-time connections`);
   console.log(`Swagger documentation available at http://localhost:${PORT}/api-docs`);
+  console.log(`MongoDB connection status: ${mongoose.connection.readyState === 1 ? 'Connected' : 'Connecting...'}`);
 });
 
 module.exports = { app, server, io };
-
