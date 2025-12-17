@@ -11,6 +11,8 @@
 /backend/logs/*.log.*.*.*.*.*
 /backend/uploads
 /backend/*.md
+/backend/config/firebase_credentials.json
+/backend/public/firbase_service_account.json
 
 /frontend/.env
 /frontend/node_modules
