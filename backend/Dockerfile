@@ -15,9 +15,8 @@ COPY . .
 # Create uploads directory
 RUN mkdir -p uploads
 
-# Copy GCP service account key (if needed)
-# The key will be mounted as secret in Cloud Run
-COPY config/gcp-service-account.json* ./config/ || true
+# Note: GCP service account key will be mounted as secret in Cloud Run
+# No need to copy it here as it will be available at runtime via secret mount
 
 # Expose port
 EXPOSE 8000
