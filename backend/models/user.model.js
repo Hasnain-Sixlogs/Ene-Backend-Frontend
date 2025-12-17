@@ -132,8 +132,7 @@ const userSchema = new mongoose.Schema(
 // Index for soft delete queries
 userSchema.index({ deleted_at: 1 });
 userSchema.index({ location: "2dsphere" });
-userSchema.index({ email: 1 }, { unique: true });
-userSchema.index({ mobile: 1 }, { unique: true });
+
 
 // Hash the password before saving the user document
 userSchema.pre("save", async function (next) {
