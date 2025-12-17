@@ -12,8 +12,8 @@ on:
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   SERVICE_NAME: ene-backend
-  REGION: asia-south1
-  ARTIFACT_REGISTRY: asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ene-docker-repo
+  REGION: us-south1
+  ARTIFACT_REGISTRY: us-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ene-docker-repo
 
 jobs:
   deploy:
