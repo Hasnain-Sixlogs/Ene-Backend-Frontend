@@ -39,7 +39,45 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
 }));
 
 // Database connection (non-blocking - don't wait for it)
-const connectDB = require('./config/database');
+let connectDB;
+try {
+  // Verify file exists first
+  const fs = require('fs');
+  const path = require('path');
+  const dbPath = path.join(__dirname, 'config', 'database.js');
+  
+  if (!fs.existsSync(dbPath)) {
+    console.error(`ERROR: database.js not found at ${dbPath}`);
+    console.error('Current directory:', __dirname);
+    try {
+      const configDir = path.join(__dirname, 'config');
+      if (fs.existsSync(configDir)) {
+        console.error('Files in config:', fs.readdirSync(configDir).join(', '));
+      } else {
+        console.error('Config directory does not exist');
+      }
+    } catch (e) {
+      console.error('Error reading config directory:', e.message);
+    }
+    // Create a dummy function so server can start
+    connectDB = async () => {
+      console.log('Database module not available - using dummy function');
+      return null;
+    };
+  } else {
+    console.log(`Found database.js at ${dbPath}`);
+    connectDB = require('./config/database');
+  }
+} catch (error) {
+  console.error('Error loading database module:', error);
+  console.error('Error stack:', error.stack);
+  // Create a dummy function so server can start
+  connectDB = async () => {
+    console.log('Database module failed to load - using dummy function');
+    return null;
+  };
+}
+
 // Start connection but don't block server startup
 connectDB().catch(err => {
   console.error('Initial database connection failed:', err.message);

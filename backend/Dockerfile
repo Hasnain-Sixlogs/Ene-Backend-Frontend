@@ -12,8 +12,18 @@ RUN npm ci --only=production
 # Copy application code
 COPY . .
 
+# Debug: Show what files were copied
+RUN echo "=== Directory structure ===" && \
+    ls -la && \
+    echo "=== Config directory ===" && \
+    (ls -la config/ || echo "Config directory not found") && \
+    echo "=== Checking database.js ===" && \
+    (cat config/database.js | head -5 || echo "database.js not readable") && \
+    echo "=== Checking server.js ===" && \
+    (head -5 server.js || echo "server.js not readable")
+
 # Verify critical files exist
-RUN test -f config/database.js || (echo "ERROR: database.js not found!" && exit 1)
+RUN test -f config/database.js || (echo "ERROR: database.js not found!" && ls -la config/ && exit 1)
 RUN test -f server.js || (echo "ERROR: server.js not found!" && exit 1)
 
 # Create uploads directory
