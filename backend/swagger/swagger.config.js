@@ -22,7 +22,7 @@ const options = {
         description: "Development server",
       },
       {
-        url: "https://api.example.com",
+        url: "https://ene-backend-454164503170.us-south1.run.app",
         description: "Production server",
       },
     ],

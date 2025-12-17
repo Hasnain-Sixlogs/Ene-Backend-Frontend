@@ -170,7 +170,7 @@ try {
   server.listen(PORT, '0.0.0.0', () => {
     console.log(`✅ Server is running on port ${PORT}`);
     console.log(`✅ Socket.IO is ready for real-time connections`);
-    console.log(`✅ Swagger documentation available at http://localhost:${PORT}/api-docs`);
+    console.log(`✅ Swagger documentation available at https://ene-backend-454164503170.us-south1.run.app/api-docs`);
     console.log(`✅ MongoDB connection status: ${mongoose.connection.readyState === 1 ? 'Connected' : 'Connecting...'}`);
     console.log('=== Server Started Successfully ===');
   });

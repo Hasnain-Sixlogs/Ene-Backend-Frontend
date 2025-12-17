@@ -151,7 +151,7 @@ const processUploadedFile = async (file, folder = 'general') => {
 
   // Otherwise, return local path
   const filePath = file.path.replace(uploadDir, '').replace(/\\/g, '/');
-  const baseUrl = process.env.BASE_URL || 'http://localhost:8000';
+  const baseUrl = process.env.BASE_URL || 'https://ene-backend-454164503170.us-south1.run.app';
   return `${baseUrl}/uploads${filePath}`;
 };
 

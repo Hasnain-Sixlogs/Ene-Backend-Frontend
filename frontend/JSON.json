@@ -15,7 +15,7 @@
 }
 "servers":[1 item
 0:{3 items
-"url":"http://localhost:8080/api"
+"url":"https://ene-backend-454164503170.us-south1.run.app/api"
 "description":"Production Server"
 "variables":{1 item
 "schema":{2 items
