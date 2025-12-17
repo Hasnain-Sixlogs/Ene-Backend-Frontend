@@ -1,15 +1,32 @@
+console.log('=== Starting Server ===');
+console.log('Node version:', process.version);
+console.log('Current directory:', __dirname);
+
 const express = require('express');
 const http = require('http');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
-const { Server } = require('socket.io');
-const swaggerUi = require('swagger-ui-express');
-const swaggerSpec = require('./swagger/swagger.config');
+
+console.log('Core modules loaded');
 
 // Load environment variables
 dotenv.config();
+console.log('Environment variables loaded');
+
+let swaggerSpec;
+try {
+  swaggerSpec = require('./swagger/swagger.config');
+  console.log('Swagger config loaded');
+} catch (error) {
+  console.error('Error loading swagger config:', error.message);
+  swaggerSpec = { openapi: '3.0.0', info: { title: 'API', version: '1.0.0' }, paths: {} };
+}
+
+const { Server } = require('socket.io');
+const swaggerUi = require('swagger-ui-express');
+console.log('All modules loaded');
 
 const app = express();
 const server = http.createServer(app);
@@ -84,11 +101,25 @@ connectDB().catch(err => {
   console.log('Server will start anyway, database will retry in background');
 });
 
-// Import routes
-const indexRoutes = require('./routes/index.route');
-
-// API routes
-app.use('/api/v2', indexRoutes);
+// Import routes with error handling
+let indexRoutes;
+try {
+  console.log('Loading routes...');
+  indexRoutes = require('./routes/index.route');
+  console.log('Routes loaded successfully');
+  // API routes
+  app.use('/api/v2', indexRoutes);
+} catch (error) {
+  console.error('Error loading routes:', error);
+  console.error('Error stack:', error.stack);
+  // Create a dummy router so server can start
+  const dummyRouter = express.Router();
+  dummyRouter.get('*', (req, res) => {
+    res.status(503).json({ error: 'Routes not loaded', message: error.message });
+  });
+  app.use('/api/v2', dummyRouter);
+  console.log('Using dummy routes - server will start but API will not work');
+}
 
 // Health check route
 app.get('/health', (req, res) => {
@@ -119,18 +150,40 @@ app.use((req, res) => {
   });
 });
 
-// Setup Socket.IO chat handlers
-const { setupUserAdminChatHandlers } = require('./socket/userAdminChatHandlers');
-setupUserAdminChatHandlers(io);
+// Setup Socket.IO chat handlers with error handling
+try {
+  console.log('Loading Socket.IO handlers...');
+  const { setupUserAdminChatHandlers } = require('./socket/userAdminChatHandlers');
+  setupUserAdminChatHandlers(io);
+  console.log('Socket.IO handlers loaded');
+} catch (error) {
+  console.error('Error loading Socket.IO handlers:', error);
+  console.error('Error stack:', error.stack);
+  console.log('Server will continue without Socket.IO handlers');
+}
 
 const PORT = process.env.PORT || 8000;
 
+console.log(`Attempting to start server on port ${PORT}...`);
+
 // Listen on 0.0.0.0 to accept connections from Cloud Run
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server is running on port ${PORT}`);
-  console.log(`Socket.IO is ready for real-time connections`);
-  console.log(`Swagger documentation available at http://localhost:${PORT}/api-docs`);
-  console.log(`MongoDB connection status: ${mongoose.connection.readyState === 1 ? 'Connected' : 'Connecting...'}`);
-});
+try {
+  server.listen(PORT, '0.0.0.0', () => {
+    console.log(`✅ Server is running on port ${PORT}`);
+    console.log(`✅ Socket.IO is ready for real-time connections`);
+    console.log(`✅ Swagger documentation available at http://localhost:${PORT}/api-docs`);
+    console.log(`✅ MongoDB connection status: ${mongoose.connection.readyState === 1 ? 'Connected' : 'Connecting...'}`);
+    console.log('=== Server Started Successfully ===');
+  });
+
+  server.on('error', (error) => {
+    console.error('❌ Server error:', error);
+    process.exit(1);
+  });
+} catch (error) {
+  console.error('❌ Failed to start server:', error);
+  console.error('Error stack:', error.stack);
+  process.exit(1);
+}
 
 module.exports = { app, server, io };
