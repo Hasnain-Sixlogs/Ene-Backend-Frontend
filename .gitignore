@@ -11,8 +11,7 @@
 /backend/logs/*.log.*.*.*.*.*
 /backend/uploads
 /backend/*.md
-/backend/config/firebase_credentials.json
-/backend/public/firbase_service_account.json
+/backend/package-lock.json
 
 /frontend/.env
 /frontend/node_modules
@@ -25,3 +24,4 @@
 /frontend/logs/*.log.*.*.*
 /frontend/logs/*.log.*.*.*.*
 /frontend/logs/*.log.*.*.*.*.*
+/frontend/package-lock.json
