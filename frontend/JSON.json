@@ -1,0 +1,5557 @@
+"root":{8 items
+"openapi":"3.0.0"
+"info":{6 items
+"title":"Digital Bible Platform"
+"description":"Fast, easy, and free API access to video, audio, and text Bibles."
+"termsOfService":"http://digitalbibleplatform/terms/"
+"contact":{1 item
+"email":"support@digitalbibleplatform.com"
+}
+"license":{2 items
+"name":"Apache 2.0"
+"url":"http://www.apache.org/licenses/LICENSE-2.0.html"
+}
+"version":"4.0.0-beta"
+}
+"servers":[1 item
+0:{3 items
+"url":"http://localhost:8080/api"
+"description":"Production Server"
+"variables":{1 item
+"schema":{2 items
+"enum":[1 item
+0:"https"
+]
+"default":"https"
+}
+}
+}
+]
+"paths":{30 items
+"/timestamps":{1 item
+"get":{6 items
+"tags":[1 item
+0:"Audio Timing"
+]
+"summary":"Returns Bible Filesets which have audio timestamps"
+"description":"This call returns a list of fileset that have timestamp metadata associated with them. This data could be used to search audio bibles for a specific term, make karaoke verse & audio readings, or to jump to a specific location in an audio file."
+"operationId":"v4_timestamps"
+"parameters":[1 item
+0:{1 item
+"$ref":"#/components/parameters/version_number"
+}
+]
+"responses":{1 item
+"200":{2 items
+"description":"successful operation"
+"content":{1 item
+"application/json":{1 item
+"schema":{1 item
+"$ref":"#/components/schemas/v4_bible_timestamps"
+}
+}
+}
+}
+}
+}
+}
+"/timestamps/{fileset_id}/{book}/{chapter}":{1 item
+"get":{6 items
+"tags":[2 items
+0:"Bibles"
+1:"Audio Timing"
+]
+"summary":"Returns audio timestamps for a chapter"
+"description":"This route will return timestamps for a chapter. Note that the fileset id must be available via the path `/timestamps`. At first, only a few filesets may have timestamps metadata applied."
+"operationId":"v4_timestamps.verse"
+"parameters":[4 items
+0:{5 items
+"name":"fileset_id"
+"in":"path"
+"description":"The specific fileset to return references for"
+"required":true
+"schema":{1 item
+"$ref":"#/components/schemas/BibleFileset/properties/id"
+}
+}
+1:{5 items
+"name":"book"
+"in":"path"
+"description":"The Book ID for which to return timestamps. For a complete list see the `book_id` field in the `/bibles/books` route."
+"required":true
+"schema":{1 item
+"$ref":"#/components/schemas/Book/properties/id"
+}
+}
+2:{5 items
+"name":"chapter"
+"in":"path"
+"description":"The chapter for which to return timestamps"
+"required":true
+"schema":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/chapter_start"
+}
+}
+3:{1 item
+"$ref":"#/components/parameters/version_number"
+}
+]
+"responses":{1 item
+"200":{2 items
+"description":"successful operation"
+"content":{1 item
+"application/json":{1 item
+"schema":{1 item
+"$ref":"#/components/schemas/v4_audio_timestamps"
+}
+}
+}
+}
+}
+}
+}
+"/bibles/filesets/{fileset_id}/{book}/{chapter}":{1 item
+"get":{6 items
+"tags":[1 item
+0:"Bibles"
+]
+"summary":"Returns content for a single fileset, book and chapter"
+"description":"For a given fileset, book and chapter, return content (text, audio or video)"
+"operationId":"v4_bible_filesets.showChapter"
+"parameters":[6 items
+0:{5 items
+"name":"fileset_id"
+"in":"path"
+"description":"The fileset ID"
+"required":true
+"schema":{1 item
+"$ref":"#/components/schemas/BibleFileset/properties/id"
+}
+}
+1:{5 items
+"name":"book"
+"in":"path"
+"description":"Will filter the results by the given book. For a complete list see the `book_id` field in the `/bibles/books` route."
+"required":true
+"schema":{1 item
+"$ref":"#/components/schemas/Book/properties/id"
+}
+}
+2:{5 items
+"name":"chapter"
+"in":"path"
+"description":"Will filter the results by the given chapter"
+"required":true
+"schema":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/chapter_start"
+}
+}
+3:{4 items
+"name":"verse_start"
+"in":"query"
+"description":"Will filter the results by the given starting verse"
+"schema":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/verse_start"
+}
+}
+4:{4 items
+"name":"verse_end"
+"in":"query"
+"description":"Will filter the results by the given ending verse"
+"schema":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/verse_end"
+}
+}
+5:{1 item
+"$ref":"#/components/parameters/version_number"
+}
+]
+"responses":{1 item
+"200":{2 items
+"description":"successful operation"
+"content":{1 item
+"application/json":{1 item
+"schema":{1 item
+"$ref":"#/components/schemas/v4_bible_filesets.showChapter"
+}
+}
+}
+}
+}
+}
+}
+"/bibles/filesets/media/types":{1 item
+"get":{6 items
+"tags":[1 item
+0:"Bibles"
+]
+"summary":"Available fileset types"
+"description":"A list of all the file types that exist within the filesets"
+"operationId":"v4_bible_filesets.types"
+"parameters":[1 item
+0:{1 item
+"$ref":"#/components/parameters/version_number"
+}
+]
+"responses":{1 item
+"200":{2 items
+"description":"successful operation"
+"content":{1 item
+"application/json":{1 item
+"schema":{2 items
+"type":"object"
+"example":{7 items
+"audio_drama":"Dramatized Audio"
+"audio":"Audio"
+"text_plain":"Plain Text"
+"text_format":"Formatted Text"
+"video_stream":"Video"
+"audio_stream":"Audio HLS Stream"
+"audio_drama_stream":"Dramatized Audio HLS Stream"
+}
+}
+}
+}
+}
+}
+}
+}
+"/download/{fileset_id}/{book_id}/{chapter}":{1 item
+"get":{6 items
+"tags":[1 item
+0:"Bibles"
+]
+"summary":"Download specific fileset"
+"description":"For a given fileset return content (text, audio or video)"
+"operationId":"v4_download"
+"parameters":[4 items
+0:{5 items
+"name":"fileset_id"
+"in":"path"
+"description":"The fileset ID"
+"required":true
+"schema":{1 item
+"$ref":"#/components/schemas/BibleFileset/properties/id"
+}
+}
+1:{5 items
+"name":"book_id"
+"in":"path"
+"description":"Will filter the results by the given book. For a complete list see the `book_id` field in the `/bibles/books` route."
+"required":false
+"schema":{1 item
+"$ref":"#/components/schemas/Book/properties/id"
+}
+}
+2:{5 items
+"name":"chapter"
+"in":"path"
+"description":"Will filter the results by the given chapter"
+"required":false
+"schema":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/chapter_start"
+}
+}
+3:{1 item
+"$ref":"#/components/parameters/version_number"
+}
+]
+"responses":{1 item
+"200":{2 items
+"description":"successful operation"
+"content":{1 item
+"application/json":{1 item
+"schema":{1 item
+"$ref":"#/components/schemas/v4_bible_filesets_download.index"
+}
+}
+}
+}
+}
+}
+}
+"/download/list":{1 item
+"get":{6 items
+"tags":[1 item
+0:"Bibles"
+]
+"summary":"List of filesets which can be downloaded for this API key"
+"description":"List of filesets which can be downloaded for this API key"
+"operationId":"v4_download_list"
+"parameters":[4 items
+0:{4 items
+"name":"limit"
+"in":"query"
+"description":"The number of search results to return"
+"schema":{1 item
+"$ref":"#/components/schemas/BibleFileset/properties/id"
+}
+}
+1:{4 items
+"name":"page"
+"in":"query"
+"description":"The current page of the results"
+"schema":{2 items
+"type":"integer"
+"default":1
+}
+}
+2:{4 items
+"name":"type"
+"in":"query"
+"description":"Filter by type of content (audio, video, text)"
+"schema":{1 item
+"type":"string"
+}
+}
+3:{1 item
+"$ref":"#/components/parameters/version_number"
+}
+]
+"responses":{1 item
+"200":{2 items
+"description":"successful operation"
+"content":{1 item
+"application/json":{1 item
+"schema":{1 item
+"$ref":"#/components/schemas/v4_bible_filesets_download.list"
+}
+}
+}
+}
+}
+}
+}
+"/bibles/verses/{language_code}/{book_id}/{chapter_id}/{verse_number?}":{1 item
+"get":{6 items
+"tags":[1 item
+0:"BibleVerses"
+]
+"summary":"Returns Bibles Verses based on filter criteria"
+"description":"The base bible route returning by default bibles and filesets that your key has access to"
+"operationId":"v4_bible_verses.verse_by_language"
+"parameters":[7 items
+0:{5 items
+"name":"language_code"
+"in":"path"
+"description":""
+"required":true
+"schema":{1 item
+"$ref":"#/components/schemas/Language/properties/id"
+}
+}
+1:{6 items
+"name":"book_id"
+"in":"path"
+"description":"The book to filter bible_verses by"
+"required":true
+"schema":{1 item
+"$ref":"#/components/schemas/Book/properties/id"
+}
+"example":"MAT"
+}
+2:{5 items
+"name":"chapter"
+"in":"query"
+"description":"The chapter to filter bible_verses by"
+"required":true
+"schema":{1 item
+"$ref":"#/components/schemas/BibleVerse/properties/chapter"
+}
+}
+3:{5 items
+"name":"verse_number"
+"in":"path"
+"description":"The verse start to filter bible_verses by"
+"schema":{1 item
+"$ref":"#/components/schemas/BibleVerse/properties/verse_number"
+}
+"example":"10"
+}
+4:{1 item
+"$ref":"#/components/parameters/page"
+}
+5:{1 item
+"$ref":"#/components/parameters/limit"
+}
+6:{1 item
+"$ref":"#/components/parameters/version_number"
+}
+]
+"responses":{1 item
+"200":{2 items
+"description":"successful operation"
+"content":{1 item
+"application/json":{1 item
+"schema":{1 item
+"$ref":"#/components/schemas/v4_bible_verses.all"
+}
+}
+}
+}
+}
+}
+}
+"/bible/{bible_id}/verses/{book_id}/{chapter_id}/{verse_number?}":{1 item
+"get":{6 items
+"tags":[1 item
+0:"BibleVerses"
+]
+"summary":"Returns Bibles Verses based on filter criteria"
+"description":"The base bible route returning by default bibles and filesets that your key has access to"
+"operationId":"v4_bible_verses.verse_by_bible"
+"parameters":[7 items
+0:{5 items
+"name":"bible_id"
+"in":"path"
+"description":"The Bible ID to filter bible_verses by"
+"required":true
+"schema":{1 item
+"$ref":"#/components/schemas/Bible/properties/id"
+}
+}
+1:{6 items
+"name":"book_id"
+"in":"path"
+"description":"The book to filter bible_verses by"
+"required":true
+"schema":{1 item
+"$ref":"#/components/schemas/Book/properties/id"
+}
+"example":"MAT"
+}
+2:{5 items
+"name":"chapter"
+"in":"query"
+"description":"The chapter to filter bible_verses by"
+"required":true
+"schema":{1 item
+"$ref":"#/components/schemas/BibleVerse/properties/chapter"
+}
+}
+3:{5 items
+"name":"verse_number"
+"in":"path"
+"description":"The verse start to filter bible_verses by"
+"schema":{1 item
+"$ref":"#/components/schemas/BibleVerse/properties/verse_number"
+}
+"example":"10"
+}
+4:{1 item
+"$ref":"#/components/parameters/page"
+}
+5:{1 item
+"$ref":"#/components/parameters/limit"
+}
+6:{1 item
+"$ref":"#/components/parameters/version_number"
+}
+]
+"responses":{1 item
+"200":{2 items
+"description":"successful operation"
+"content":{1 item
+"application/json":{1 item
+"schema":{1 item
+"$ref":"#/components/schemas/v4_bible_verses.all"
+}
+}
+}
+}
+}
+}
+}
+"/bibles":{1 item
+"get":{6 items
+"tags":[1 item
+0:"Bibles"
+]
+"summary":"Returns Bibles based on filter criteria"
+"description":"The base bible route returning by default bibles and filesets that your key has access to"
+"operationId":"v4_bible.all"
+"parameters":[8 items
+0:{4 items
+"name":"language_code"
+"in":"query"
+"description":"The iso code to filter results by. This will return results only in the language specified. For a complete list see the `iso` field in the `/languages` route"
+"schema":{1 item
+"$ref":"#/components/schemas/Language/properties/iso"
+}
+}
+1:{5 items
+"name":"media"
+"in":"query"
+"description":"Will filter bibles based upon the media type of their filesets"
+"schema":{1 item
+"$ref":"#/components/schemas/BibleFilesetType/properties/set_type_code"
+}
+"example":"audio_drama"
+}
+2:{5 items
+"name":"media_exclude"
+"in":"query"
+"description":"Will exclude bibles based upon the media type of their filesets"
+"schema":{1 item
+"$ref":"#/components/schemas/BibleFilesetType/properties/set_type_code"
+}
+"example":"audio"
+}
+3:{5 items
+"name":"country"
+"in":"query"
+"description":"The iso code to filter results by. This will return results only in the language specified. For a complete list see the `iso` field in the `/country` route"
+"schema":{1 item
+"$ref":"#/components/schemas/Country/properties/id"
+}
+"example":"21"
+}
+4:{5 items
+"name":"audio_timing"
+"in":"query"
+"description":"This will return results only which have audio timing information available for that bible. The timing information is stored in table bible_file_timestamps."
+"schema":{2 items
+"type":"boolean"
+"default":false
+}
+"example":"true"
+}
+5:{1 item
+"$ref":"#/components/parameters/page"
+}
+6:{1 item
+"$ref":"#/components/parameters/limit"
+}
+7:{1 item
+"$ref":"#/components/parameters/version_number"
+}
+]
+"responses":{1 item
+"200":{2 items
+"description":"successful operation"
+"content":{1 item
+"application/json":{1 item
+"schema":{1 item
+"$ref":"#/components/schemas/v4_bible.all"
+}
+}
+}
+}
+}
+}
+}
+"/bibles/search/{search_text}":{1 item
+"get":{6 items
+"tags":[1 item
+0:"Bibles"
+]
+"summary":"Returns metadata for all bibles meeting the search_text in it's name"
+"description":"metadata for all bibles meeting the search_text in it's name"
+"operationId":"v4_bible.search"
+"parameters":[2 items
+0:{4 items
+"name":"search_text"
+"in":"path"
+"required":true
+"schema":{1 item
+"$ref":"#/components/schemas/Bible/properties/id"
+}
+}
+1:{1 item
+"$ref":"#/components/parameters/version_number"
+}
+]
+"responses":{1 item
+"200":{2 items
+"description":"successful operation"
+"content":{1 item
+"application/json":{1 item
+"schema":{1 item
+"$ref":"#/components/schemas/v4_bible.search"
+}
+}
+}
+}
+}
+}
+}
+"/bibles/search":{1 item
+"get":{6 items
+"tags":[1 item
+0:"Bibles"
+]
+"summary":"Returns metadata for all bibles meeting the given version in it's Bible ID"
+"description":"metadata for all bibles meeting the version in it's Bible ID"
+"operationId":"v4_bible_by_id.search"
+"parameters":[2 items
+0:{4 items
+"name":"version"
+"in":"query"
+"required":true
+"schema":{1 item
+"$ref":"#/components/schemas/Bible/properties/id"
+}
+}
+1:{1 item
+"$ref":"#/components/parameters/version_number"
+}
+]
+"responses":{1 item
+"200":{2 items
+"description":"successful operation"
+"content":{1 item
+"application/json":{1 item
+"schema":{1 item
+"$ref":"#/components/schemas/v4_bible.search"
+}
+}
+}
+}
+}
+}
+}
+"/bibles/{id}":{1 item
+"get":{6 items
+"tags":[1 item
+0:"Bibles"
+]
+"summary":"Returns detailed metadata for a single Bible"
+"description":"Detailed information for a single Bible"
+"operationId":"v4_bible.one"
+"parameters":[3 items
+0:{4 items
+"name":"id"
+"in":"path"
+"required":true
+"schema":{1 item
+"$ref":"#/components/schemas/Bible/properties/id"
+}
+}
+1:{2 items
+"name":"include_font"
+"in":"query"
+}
+2:{1 item
+"$ref":"#/components/parameters/version_number"
+}
+]
+"responses":{1 item
+"200":{2 items
+"description":"successful operation"
+"content":{1 item
+"application/json":{1 item
+"schema":{1 item
+"$ref":"#/components/schemas/v4_bible.one"
+}
+}
+}
+}
+}
+}
+}
+"/bibles/{id}/book":{1 item
+"get":{6 items
+"tags":[1 item
+0:"Bibles"
+]
+"summary":"Book information for a Bible"
+"description":"Returns a list of translated book names and general information for the given Bible. The actual list of books may vary from fileset to fileset. For example, a King James Fileset may contain deuterocanonical books that are missing from one of it's sibling filesets nested within the bible parent."
+"operationId":"v4_bible.books"
+"parameters":[5 items
+0:{4 items
+"name":"id"
+"in":"path"
+"required":true
+"schema":{1 item
+"$ref":"#/components/schemas/Bible/properties/id"
+}
+}
+1:{4 items
+"name":"book_id"
+"in":"query"
+"description":"The book id. For a complete list see the `book_id` field in the `/bibles/books` route."
+"schema":{1 item
+"$ref":"#/components/schemas/Book/properties/id"
+}
+}
+2:{4 items
+"name":"verify_content"
+"in":"query"
+"description":"Filter all the books that have content"
+"schema":{1 item
+"type":"boolean"
+}
+}
+3:{4 items
+"name":"verse_count"
+"in":"query"
+"description":"Retrieve how many verses the chapters of the books have"
+"schema":{1 item
+"type":"boolean"
+}
+}
+4:{1 item
+"$ref":"#/components/parameters/version_number"
+}
+]
+"responses":{1 item
+"200":{2 items
+"description":"successful operation"
+"content":{1 item
+"application/json":{1 item
+"schema":{1 item
+"$ref":"#/components/schemas/v4_bible.books"
+}
+}
+}
+}
+}
+}
+}
+"/bibles/defaults/types":{1 item
+"get":{6 items
+"tags":[1 item
+0:"Bibles"
+]
+"summary":"Default Bible for a language"
+"description":"Returns default Bible for a language"
+"operationId":"v4_bible.defaults"
+"parameters":[2 items
+0:{4 items
+"name":"language_code"
+"in":"query"
+"description":"The language code to filter results by"
+"schema":{3 items
+"type":"string"
+"maxLength":6
+"example":"en"
+}
+}
+1:{1 item
+"$ref":"#/components/parameters/version_number"
+}
+]
+"responses":{1 item
+"200":{2 items
+"description":"successful operation"
+"content":{1 item
+"application/json":{1 item
+"schema":{1 item
+"$ref":"#/components/schemas/v4_bibles_defaults"
+}
+}
+}
+}
+}
+}
+}
+"/bibles/{bible_id}/copyright":{1 item
+"get":{6 items
+"tags":[1 item
+0:"Bibles"
+]
+"summary":"Bible Copyright information"
+"description":"All bible fileset's copyright information and organizational connections"
+"operationId":"v4_bible.copyright"
+"parameters":[3 items
+0:{5 items
+"name":"bible_id"
+"in":"path"
+"description":"The Bible ID to retrieve the copyright information for"
+"required":true
+"schema":{1 item
+"$ref":"#/components/schemas/Bible/properties/id"
+}
+}
+1:{4 items
+"name":"iso"
+"in":"query"
+"description":"The iso code to filter organization translations by. For a complete list see the `iso` field in the `/languages` route."
+"schema":{1 item
+"$ref":"#/components/schemas/Language/properties/iso"
+}
+}
+2:{1 item
+"$ref":"#/components/parameters/version_number"
+}
+]
+"responses":{1 item
+"200":{2 items
+"description":"The requested bible copyrights"
+"content":{1 item
+"application/json":{1 item
+"schema":{1 item
+"$ref":"#/components/schemas/v4_bible.copyright"
+}
+}
+}
+}
+}
+}
+}
+"/bibles/{fileset_id}/{book}/{chapter}":{1 item
+"get":{6 items
+"tags":[1 item
+0:"Library Text"
+]
+"summary":"Returns Signed URLs or Text"
+"description":"V4's base fileset route"
+"operationId":"v4_bible.verseinfo"
+"parameters":[4 items
+0:{5 items
+"name":"fileset_id"
+"in":"query"
+"description":"The Bible fileset ID"
+"required":true
+"schema":{1 item
+"$ref":"#/components/schemas/BibleFileset/properties/id"
+}
+}
+1:{5 items
+"name":"book"
+"in":"query"
+"description":"The Book ID. For a complete list see the `book_id` field in the `/bibles/books` route."
+"required":true
+"schema":{1 item
+"$ref":"#/components/schemas/Book/properties/id"
+}
+}
+2:{5 items
+"name":"chapter"
+"in":"query"
+"description":"The chapter number"
+"required":true
+"schema":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/chapter_start"
+}
+}
+3:{1 item
+"$ref":"#/components/parameters/version_number"
+}
+]
+"responses":{1 item
+"200":{2 items
+"description":"successful operation"
+"content":{3 items
+"application/json":{1 item
+"schema":{1 item
+"$ref":"#/components/schemas/v2_text_verse"
+}
+}
+"application/xml":{1 item
+"schema":{1 item
+"$ref":"#/components/schemas/v2_text_verse"
+}
+}
+"text/x-yaml":{1 item
+"schema":{1 item
+"$ref":"#/components/schemas/v2_text_verse"
+}
+}
+}
+}
+}
+}
+}
+"/search":{1 item
+"get":{6 items
+"tags":[1 item
+0:"Search"
+]
+"summary":"Search a bible for a word"
+"description":""
+"operationId":"v4_text_search"
+"parameters":[7 items
+0:{6 items
+"name":"query"
+"in":"query"
+"description":"The word or phrase being searched"
+"required":true
+"schema":{1 item
+"type":"string"
+}
+"example":"Jesus"
+}
+1:{5 items
+"name":"fileset_id"
+"in":"query"
+"description":"The Bible fileset ID"
+"required":true
+"schema":{1 item
+"$ref":"#/components/schemas/BibleFileset/properties/id"
+}
+}
+2:{4 items
+"name":"limit"
+"in":"query"
+"description":"The number of search results to return"
+"schema":{2 items
+"type":"integer"
+"default":15
+}
+}
+3:{1 item
+"$ref":"#/components/parameters/page"
+}
+4:{1 item
+"$ref":"#/components/parameters/sort_by"
+}
+5:{4 items
+"name":"books"
+"in":"query"
+"description":"The usfm book ids to search through separated by a comma"
+"schema":{2 items
+"type":"string"
+"example":"GEN,EXO,MAT"
+}
+}
+6:{1 item
+"$ref":"#/components/parameters/version_number"
+}
+]
+"responses":{1 item
+"200":{2 items
+"description":"successful operation"
+"content":{1 item
+"application/json":{1 item
+"schema":{1 item
+"$ref":"#/components/schemas/v4_text_search"
+}
+}
+}
+}
+}
+}
+}
+"/arclight/jesus-film/languages":{1 item
+"get":{6 items
+"tags":[1 item
+0:"Arclight"
+]
+"summary":"Returns detailed metadata for a single Bible arclight"
+"description":"Returns detailed metadata for a single Bible arclight"
+"operationId":"v4_video_jesus_film_languages"
+"parameters":[4 items
+0:{2 items
+"name":"show_detail"
+"in":"query"
+}
+1:{2 items
+"name":"metadata_tag"
+"in":"query"
+}
+2:{2 items
+"name":"iso"
+"in":"query"
+}
+3:{1 item
+"$ref":"#/components/parameters/version_number"
+}
+]
+"responses":{1 item
+"200":{2 items
+"description":"successful operation"
+"content":{1 item
+"application/json":{}0 items
+}
+}
+}
+}
+}
+"/users/{user_id}/annotations/{bible_id}/{book_id}/{chapter}":{1 item
+"get":{6 items
+"tags":[1 item
+0:"Annotations"
+]
+"summary":"Download annotations for specific user and bible fileset"
+"description":"For a given fileset return content (text, audio or video)"
+"operationId":"v4_users_download"
+"parameters":[9 items
+0:{5 items
+"name":"user_id"
+"in":"path"
+"description":"The User ID"
+"required":true
+"schema":{1 item
+"$ref":"#/components/schemas/User/properties/id"
+}
+}
+1:{5 items
+"name":"bible_id"
+"in":"path"
+"description":"Will filter the results by the given bible"
+"required":true
+"schema":{1 item
+"$ref":"#/components/schemas/Bible/properties/id"
+}
+}
+2:{4 items
+"name":"book_id"
+"in":"path"
+"description":"Will filter the results by the given book. For a complete list see the `book_id` field in the `/bibles/books` route."
+"schema":{1 item
+"$ref":"#/components/schemas/Book/properties/id"
+}
+}
+3:{4 items
+"name":"chapter"
+"in":"path"
+"description":"Will filter the results by the given chapter"
+"schema":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/chapter_start"
+}
+}
+4:{4 items
+"name":"notes_sort_by"
+"in":"query"
+"description":"The field to sort by for the notes"
+"schema":{1 item
+"type":"string"
+}
+}
+5:{4 items
+"name":"bookmarks_sort_by"
+"in":"query"
+"description":"The field to sort by for the bookmarks"
+"schema":{1 item
+"type":"string"
+}
+}
+6:{4 items
+"name":"highlights_sort_by"
+"in":"query"
+"description":"The field to sort by for the highlights"
+"schema":{1 item
+"type":"string"
+}
+}
+7:{4 items
+"name":"sort_dir"
+"in":"query"
+"description":"The direction to sort by"
+"schema":{2 items
+"type":"string"
+"enum":[2 items
+0:"asc"
+1:"desc"
+]
+}
+}
+8:{1 item
+"$ref":"#/components/parameters/version_number"
+}
+]
+"responses":{1 item
+"200":{2 items
+"description":"successful operation"
+"content":{1 item
+"application/json":{1 item
+"schema":{1 item
+"$ref":"#/components/schemas/v4_users_download_annotations.index"
+}
+}
+}
+}
+}
+}
+}
+"/alphabets":{1 item
+"get":{6 items
+"tags":[1 item
+0:"Languages"
+]
+"summary":"Returns Alphabets"
+"description":"Returns a list of the world's known scripts. This route might be useful to you if you'd like to query information about fonts, alphabets, and the world's writing systems. Some fileset returns may not display correctly without a font delivered by these via the `alphabets/{script_id}` routes."
+"operationId":"v4_alphabets.all"
+"parameters":[1 item
+0:{1 item
+"$ref":"#/components/parameters/version_number"
+}
+]
+"responses":{1 item
+"200":{2 items
+"description":"successful operation"
+"content":{1 item
+"application/json":{1 item
+"schema":{1 item
+"$ref":"#/components/schemas/v4_alphabets_all_response"
+}
+}
+}
+}
+}
+}
+}
+"/alphabets/{script_id}":{1 item
+"get":{6 items
+"tags":[1 item
+0:"Languages"
+]
+"summary":"Return details on a single Alphabet"
+"description":"Returns a single alphabet along with whatever bibles and languages using it."
+"operationId":"v4_alphabets.one"
+"parameters":[2 items
+0:{5 items
+"name":"script_id"
+"in":"path"
+"description":"The alphabet Script, which is used as the identifier"
+"required":true
+"schema":{1 item
+"$ref":"#/components/schemas/Alphabet/properties/script"
+}
+}
+1:{1 item
+"$ref":"#/components/parameters/version_number"
+}
+]
+"responses":{1 item
+"200":{2 items
+"description":"successful operation"
+"content":{1 item
+"application/json":{1 item
+"schema":{1 item
+"$ref":"#/components/schemas/v4_alphabets_one_response"
+}
+}
+}
+}
+}
+}
+}
+"/countries":{1 item
+"get":{6 items
+"tags":[1 item
+0:"Countries"
+]
+"summary":"Returns Countries"
+"description":"Returns the List of Countries"
+"operationId":"v4_countries.all"
+"parameters":[3 items
+0:{4 items
+"name":"l10n"
+"in":"query"
+"description":"When set to a valid three letter language iso, the returning results will be localized in the language matching that iso. (If an applicable translation exists). For a complete list see the `iso` field in the `/languages` route"
+"schema":{1 item
+"$ref":"#/components/schemas/Language/properties/iso"
+}
+}
+1:{4 items
+"name":"include_languages"
+"in":"query"
+"description":"When set to true, the return will include the major languages used in each country. "
+"schema":{1 item
+"type":"boolean"
+}
+}
+2:{1 item
+"$ref":"#/components/parameters/version_number"
+}
+]
+"responses":{1 item
+"200":{2 items
+"description":"successful operation"
+"content":{1 item
+"application/json":{1 item
+"schema":{1 item
+"$ref":"#/components/schemas/v4_countries.all"
+}
+}
+}
+}
+}
+}
+}
+"/countries/search/{search_text}":{1 item
+"get":{6 items
+"tags":[1 item
+0:"Countries"
+]
+"summary":"Returns Countries"
+"description":"Returns the List of Countries filtered by names"
+"operationId":"v4_countries.search"
+"parameters":[2 items
+0:{5 items
+"name":"search_text"
+"in":"path"
+"description":"Search countries by name"
+"required":true
+"schema":{1 item
+"$ref":"#/components/schemas/Country/properties/iso_a3"
+}
+}
+1:{1 item
+"$ref":"#/components/parameters/version_number"
+}
+]
+"responses":{1 item
+"200":{2 items
+"description":"successful operation"
+"content":{1 item
+"application/json":{}0 items
+}
+}
+}
+}
+}
+"/countries/{id}":{1 item
+"get":{7 items
+"tags":[1 item
+0:"Countries"
+]
+"summary":"Returns details for a single Country"
+"description":"Returns details for a single Country"
+"externalDocs":{2 items
+"description":"For more information on Country Codes, please refer to the ISO Registration Authority"
+"url":"https://www.iso.org/iso-3166-country-codes.html"
+}
+"operationId":"v4_countries.one"
+"parameters":[2 items
+0:{4 items
+"name":"id"
+"in":"path"
+"required":true
+"schema":{1 item
+"$ref":"#/components/schemas/Country/properties/id"
+}
+}
+1:{1 item
+"$ref":"#/components/parameters/version_number"
+}
+]
+"responses":{1 item
+"200":{2 items
+"description":"successful operation"
+"content":{1 item
+"application/json":{1 item
+"schema":{1 item
+"$ref":"#/components/schemas/v4_countries.one"
+}
+}
+}
+}
+}
+}
+}
+"/languages":{1 item
+"get":{6 items
+"tags":[1 item
+0:"Languages"
+]
+"summary":"Returns Languages"
+"description":"Returns the List of Languages"
+"operationId":"v4_languages.all"
+"parameters":[8 items
+0:{4 items
+"name":"country"
+"in":"query"
+"description":"The ISO Country Code. For a complete list of Country codes, please refer to the ISO Registration Authority. https://www.iso.org/iso-3166-country-codes.html"
+"schema":{1 item
+"$ref":"#/components/schemas/Country/properties/id"
+}
+}
+1:{4 items
+"name":"language_code"
+"in":"query"
+"description":"The iso code to filter languages by. For a complete list see the `iso` field in the `/languages` route"
+"schema":{1 item
+"$ref":"#/components/schemas/Language/properties/iso"
+}
+}
+2:{4 items
+"name":"language_name"
+"in":"query"
+"description":"The language_name field will filter results by a specific language name"
+"schema":{1 item
+"$ref":"#/components/schemas/Language/properties/iso"
+}
+}
+3:{4 items
+"name":"include_translations"
+"in":"query"
+"description":"Include the ISO language ids for available translations"
+"schema":{1 item
+"type":"boolean"
+}
+}
+4:{1 item
+"$ref":"#/components/parameters/l10n"
+}
+5:{1 item
+"$ref":"#/components/parameters/page"
+}
+6:{1 item
+"$ref":"#/components/parameters/limit"
+}
+7:{1 item
+"$ref":"#/components/parameters/version_number"
+}
+]
+"responses":{1 item
+"200":{2 items
+"description":"successful operation"
+"content":{1 item
+"application/json":{1 item
+"schema":{1 item
+"$ref":"#/components/schemas/v4_languages.all"
+}
+}
+}
+}
+}
+}
+}
+"/languages/search/{search_text}":{1 item
+"get":{6 items
+"tags":[1 item
+0:"Languages"
+]
+"summary":"Returns languages related to this search"
+"description":"Returns paginated languages that have search text in its name or country"
+"operationId":"v4_languages.search"
+"parameters":[2 items
+0:{5 items
+"name":"search_text"
+"in":"path"
+"description":"The language text to search by"
+"required":true
+"schema":{1 item
+"$ref":"#/components/schemas/LanguageTranslation/properties/name"
+}
+}
+1:{1 item
+"$ref":"#/components/parameters/version_number"
+}
+]
+"responses":{1 item
+"200":{2 items
+"description":"successful operation"
+"content":{1 item
+"application/json":{1 item
+"schema":{1 item
+"$ref":"#/components/schemas/v4_languages.one"
+}
+}
+}
+}
+}
+}
+}
+"/languages/{id}":{1 item
+"get":{6 items
+"tags":[1 item
+0:"Languages"
+]
+"summary":"Returns details on a single Language"
+"description":"Returns details on a single Language"
+"operationId":"v4_languages.one"
+"parameters":[2 items
+0:{5 items
+"name":"id"
+"in":"path"
+"description":"The language ID"
+"required":true
+"schema":{1 item
+"$ref":"#/components/schemas/Language/properties/id"
+}
+}
+1:{1 item
+"$ref":"#/components/parameters/version_number"
+}
+]
+"responses":{1 item
+"200":{2 items
+"description":"successful operation"
+"content":{1 item
+"application/json":{1 item
+"schema":{1 item
+"$ref":"#/components/schemas/v4_languages.one"
+}
+}
+}
+}
+}
+}
+}
+"/numbers/range":{1 item
+"get":{6 items
+"tags":[1 item
+0:"Languages"
+]
+"summary":"Return a range of vernacular numbers"
+"description":"This route returns the vernacular numbers for a set range."
+"operationId":"v4_numbers.range"
+"parameters":[4 items
+0:{5 items
+"name":"script_id"
+"in":"query"
+"description":"The script_id to return numbers for"
+"required":true
+"schema":{1 item
+"$ref":"#/components/schemas/NumeralSystem/properties/id"
+}
+}
+1:{6 items
+"name":"start"
+"in":"query"
+"description":"The start of the range to select for"
+"required":true
+"schema":{1 item
+"type":"integer"
+}
+"example":1
+}
+2:{6 items
+"name":"end"
+"in":"query"
+"description":"The end of the range to select for"
+"required":true
+"schema":{1 item
+"type":"integer"
+}
+"example":2
+}
+3:{1 item
+"$ref":"#/components/parameters/version_number"
+}
+]
+"responses":{1 item
+"200":{2 items
+"description":"successful operation"
+"content":{1 item
+"application/json":{1 item
+"schema":{1 item
+"$ref":"#/components/schemas/v4_numbers_range"
+}
+}
+}
+}
+}
+}
+}
+"/numbers":{1 item
+"get":{6 items
+"tags":[1 item
+0:"Languages"
+]
+"summary":"Return all Alphabets that have a custom number sets"
+"description":"Returns a range of numbers"
+"operationId":"v4_numbers.index"
+"parameters":[1 item
+0:{1 item
+"$ref":"#/components/parameters/version_number"
+}
+]
+"responses":{1 item
+"200":{2 items
+"description":"successful operation"
+"content":{1 item
+"application/json":{1 item
+"schema":{1 item
+"$ref":"#/components/schemas/v4_numbers.index"
+}
+}
+}
+}
+}
+}
+}
+"/numbers/{id}":{1 item
+"get":{6 items
+"tags":[1 item
+0:"Languages"
+]
+"summary":"Return a single custom number set"
+"description":"Returns a range of numbers"
+"operationId":"v4_numbers.show"
+"parameters":[2 items
+0:{5 items
+"name":"id"
+"in":"path"
+"description":"The NumeralSystem id"
+"required":true
+"schema":{1 item
+"$ref":"#/components/schemas/NumeralSystem/properties/id"
+}
+}
+1:{1 item
+"$ref":"#/components/parameters/version_number"
+}
+]
+"responses":{1 item
+"200":{2 items
+"description":"successful operation"
+"content":{1 item
+"application/json":{1 item
+"schema":{1 item
+"$ref":"#/components/schemas/v4_numbers.show"
+}
+}
+}
+}
+}
+}
+}
+}
+"components":{5 items
+"schemas":{86 items
+"pagination":{5 items
+"title":"Pagination"
+"description":"The new pagination meta response."
+"properties":{1 item
+"pagination":{2 items
+"properties":{5 items
+"total":{2 items
+"type":"integer"
+"example":1801
+}
+"count":{2 items
+"type":"integer"
+"example":25
+}
+"per_page":{2 items
+"type":"integer"
+"example":25
+}
+"current_page":{2 items
+"type":"integer"
+"example":1
+}
+"total_pages":{2 items
+"type":"integer"
+"example":73
+}
+}
+"type":"object"
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"pagination"
+}
+}
+"v4_bible_timestamps":{5 items
+"title":"Bible Timestamps"
+"description":"The bibles hash returned for timestamps"
+"type":"array"
+"items":{2 items
+"properties":{1 item
+"fileset_id":{1 item
+"$ref":"#/components/schemas/BibleFileset/properties/id"
+}
+}
+"type":"object"
+}
+"xml":{1 item
+"name":"v4_bible.timestamps"
+}
+}
+"v4_bible_filesets.showChapter":{4 items
+"title":"v4_bible_filesets.showChapter"
+"description":"v4_bible_filesets.showChapter"
+"type":"object"
+"xml":{1 item
+"name":"v4_bible_filesets.showChapter"
+}
+}
+"v4_bible_filesets.copyright":{5 items
+"title":"v4_bible_filesets.copyright"
+"description":"v4_bible_filesets.copyright"
+"properties":{4 items
+"id":{1 item
+"$ref":"#/components/schemas/BibleFileset/properties/id"
+}
+"type":{1 item
+"$ref":"#/components/schemas/BibleFileset/properties/set_type_code"
+}
+"size":{1 item
+"$ref":"#/components/schemas/BibleFileset/properties/set_size_code"
+}
+"copyright":{1 item
+"$ref":"#/components/schemas/BibleFilesetCopyright"
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"v4_bible_filesets.copyright"
+}
+}
+"v4_bible_filesets_download.index":{4 items
+"title":"v4_bible_filesets_download.index"
+"description":"v4_bible_filesets_download.index"
+"type":"object"
+"xml":{1 item
+"name":"v4_bible_filesets_download.index"
+}
+}
+"v4_bible_filesets_download.list":{4 items
+"title":"v4_bible_filesets_download.list"
+"description":"v4_bible_filesets_download.list"
+"type":"object"
+"xml":{1 item
+"name":"v4_bible_filesets_download.list"
+}
+}
+"v4_bibles_defaults":{5 items
+"title":"v4_bibles_defaults"
+"description":"The bible defaults"
+"properties":{1 item
+"en":{2 items
+"properties":{2 items
+"video":{1 item
+"$ref":"#/components/schemas/Bible/properties/id"
+}
+"audio":{1 item
+"$ref":"#/components/schemas/Bible/properties/id"
+}
+}
+"type":"object"
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"v4_bibles_defaults"
+}
+}
+"v4_bible.copyright":{4 items
+"title":"Bible copyrights response"
+"description":"The v4 bible copyrights response."
+"type":"array"
+"items":{1 item
+"$ref":"#/components/schemas/v4_bible_filesets.copyright"
+}
+}
+"v4_bible.fileset_chapter":{2 items
+"properties":{11 items
+"book_id":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/book_id"
+}
+"book_name":{1 item
+"$ref":"#/components/schemas/BookTranslation/properties/name"
+}
+"chapter_start":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/chapter_start"
+}
+"chapter_end":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/chapter_end"
+}
+"verse_start":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/verse_start"
+}
+"verse_end":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/verse_end"
+}
+"thumbnail":{3 items
+"description":"The image url"
+"type":"string"
+"maxLength":191
+}
+"timestamp":{1 item
+"$ref":"#/components/schemas/BibleFileTimestamp/properties/timestamp"
+}
+"path":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/file_name"
+}
+"duration":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/duration"
+}
+"fileset":{2 items
+"properties":{3 items
+"id":{1 item
+"$ref":"#/components/schemas/BibleFileset/properties/id"
+}
+"type":{1 item
+"$ref":"#/components/schemas/BibleFileset/properties/set_type_code"
+}
+"size":{1 item
+"$ref":"#/components/schemas/BibleFileset/properties/set_size_code"
+}
+}
+"type":"object"
+}
+}
+"type":"object"
+}
+"v4_bible.fileset_chapter_timestamp":{2 items
+"type":"array"
+"items":{2 items
+"properties":{2 items
+"timestamp":{1 item
+"$ref":"#/components/schemas/BibleFileTimestamp/properties/timestamp"
+}
+"verse_start":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/verse_start"
+}
+}
+"type":"object"
+}
+}
+"v4_bible_chapter_jesus_films":{2 items
+"type":"array"
+"items":{2 items
+"properties":{3 items
+"component_id":{1 item
+"type":"string"
+}
+"verses":{2 items
+"type":"array"
+"items":{1 item
+"type":"integer"
+}
+}
+"meta":{2 items
+"properties":{6 items
+"thumbnail":{1 item
+"type":"string"
+}
+"thumbnail_high":{1 item
+"type":"string"
+}
+"title":{1 item
+"type":"string"
+}
+"shortDescription":{1 item
+"type":"string"
+}
+"longDescription":{1 item
+"type":"string"
+}
+"file_name":{1 item
+"type":"string"
+}
+}
+"type":"object"
+}
+}
+"type":"object"
+}
+}
+"v4_text_search":{2 items
+"properties":{2 items
+"verses":{1 item
+"$ref":"#/components/schemas/v4_bible_filesets_chapter"
+}
+"meta":{1 item
+"$ref":"#/components/schemas/pagination"
+}
+}
+"type":"object"
+}
+"v4_plan_index_detail":{2 items
+"type":"object"
+"allOf":[2 items
+0:{1 item
+"$ref":"#/components/schemas/v4_plan"
+}
+1:{2 items
+"properties":{1 item
+"total_days":{1 item
+"type":"integer"
+}
+}
+"type":"object"
+}
+]
+}
+"v4_plan":{2 items
+"properties":{10 items
+"id":{1 item
+"$ref":"#/components/schemas/Plan/properties/id"
+}
+"name":{1 item
+"$ref":"#/components/schemas/Plan/properties/name"
+}
+"featured":{1 item
+"$ref":"#/components/schemas/Plan/properties/featured"
+}
+"thumbnail":{1 item
+"$ref":"#/components/schemas/Plan/properties/thumbnail"
+}
+"suggested_start_date":{1 item
+"$ref":"#/components/schemas/Plan/properties/suggested_start_date"
+}
+"created_at":{1 item
+"$ref":"#/components/schemas/Plan/properties/created_at"
+}
+"updated_at":{1 item
+"$ref":"#/components/schemas/Plan/properties/updated_at"
+}
+"start_date":{1 item
+"$ref":"#/components/schemas/UserPlan/properties/start_date"
+}
+"percentage_completed":{1 item
+"$ref":"#/components/schemas/UserPlan/properties/percentage_completed"
+}
+"user":{1 item
+"$ref":"#/components/schemas/v4_plan_index_user"
+}
+}
+"type":"object"
+}
+"v4_plan_index_user":{3 items
+"description":"The user who created the plan"
+"properties":{2 items
+"id":{1 item
+"type":"integer"
+}
+"name":{1 item
+"type":"string"
+}
+}
+"type":"object"
+}
+"v4_plan_detail":{2 items
+"type":"object"
+"allOf":[2 items
+0:{1 item
+"$ref":"#/components/schemas/v4_plan"
+}
+1:{2 items
+"properties":{1 item
+"days":{2 items
+"type":"array"
+"items":{1 item
+"$ref":"#/components/schemas/PlanDay"
+}
+}
+}
+"type":"object"
+}
+]
+}
+"PlaylistItemDetail":{2 items
+"properties":{10 items
+"id":{1 item
+"$ref":"#/components/schemas/PlaylistItems/properties/id"
+}
+"bible_id":{1 item
+"$ref":"#/components/schemas/Bible/properties/id"
+}
+"fileset_id":{1 item
+"$ref":"#/components/schemas/PlaylistItems/properties/fileset_id"
+}
+"book_id":{1 item
+"$ref":"#/components/schemas/PlaylistItems/properties/book_id"
+}
+"chapter_start":{1 item
+"$ref":"#/components/schemas/PlaylistItems/properties/chapter_start"
+}
+"chapter_end":{1 item
+"$ref":"#/components/schemas/PlaylistItems/properties/chapter_end"
+}
+"verse_start":{1 item
+"$ref":"#/components/schemas/PlaylistItems/properties/verse_start"
+}
+"verse_end":{1 item
+"$ref":"#/components/schemas/PlaylistItems/properties/verse_end"
+}
+"duration":{1 item
+"$ref":"#/components/schemas/PlaylistItems/properties/duration"
+}
+"completed":{1 item
+"$ref":"#/components/schemas/PlaylistItems/properties/completed"
+}
+}
+"type":"object"
+}
+"v4_playlist":{2 items
+"properties":{8 items
+"id":{1 item
+"$ref":"#/components/schemas/Playlist/properties/id"
+}
+"name":{1 item
+"$ref":"#/components/schemas/Playlist/properties/name"
+}
+"featured":{1 item
+"$ref":"#/components/schemas/Playlist/properties/featured"
+}
+"created_at":{1 item
+"$ref":"#/components/schemas/Playlist/properties/created_at"
+}
+"updated_at":{1 item
+"$ref":"#/components/schemas/Playlist/properties/updated_at"
+}
+"external_content":{1 item
+"$ref":"#/components/schemas/Playlist/properties/external_content"
+}
+"following":{1 item
+"$ref":"#/components/schemas/Playlist/properties/following"
+}
+"user":{1 item
+"$ref":"#/components/schemas/v4_playlist_index_user"
+}
+}
+"type":"object"
+}
+"v4_playlist_index_user":{3 items
+"description":"The user who created the playlist"
+"properties":{2 items
+"id":{1 item
+"type":"integer"
+}
+"name":{1 item
+"type":"string"
+}
+}
+"type":"object"
+}
+"v4_playlist_detail":{2 items
+"type":"object"
+"allOf":[2 items
+0:{1 item
+"$ref":"#/components/schemas/v4_playlist"
+}
+1:{2 items
+"properties":{1 item
+"items":{2 items
+"type":"array"
+"items":{1 item
+"$ref":"#/components/schemas/PlaylistItemDetail"
+}
+}
+}
+"type":"object"
+}
+]
+}
+"v4_users_download_annotations.index":{4 items
+"title":"v4_users_download_annotations.index"
+"description":"v4_users_download_annotations.index"
+"type":"object"
+"xml":{1 item
+"name":"v4_users_download_annotations.index"
+}
+}
+"v4_languages.all":{3 items
+"description":"Display a listing of the resource. * Fetches the records from the database > passes them through fractal for transforming."
+"properties":{1 item
+"data":{2 items
+"type":"array"
+"items":{2 items
+"properties":{8 items
+"id":{1 item
+"$ref":"#/components/schemas/Language/properties/id"
+}
+"glotto_id":{1 item
+"$ref":"#/components/schemas/Language/properties/glotto_id"
+}
+"iso":{1 item
+"$ref":"#/components/schemas/Language/properties/iso"
+}
+"name":{1 item
+"$ref":"#/components/schemas/Language/properties/name"
+}
+"autonym":{1 item
+"$ref":"#/components/schemas/LanguageTranslation/properties/name"
+}
+"bibles":{2 items
+"type":"integer"
+"example":12
+}
+"filesets":{2 items
+"type":"integer"
+"example":4
+}
+"country_population":{1 item
+"$ref":"#/components/schemas/Language/properties/population"
+}
+}
+"type":"object"
+}
+}
+}
+"type":"object"
+}
+"v4_languages.one":{2 items
+"properties":{1 item
+"data":{1 item
+"$ref":"#/components/schemas/Language"
+}
+}
+"type":"object"
+}
+"v4_numbers_range":{5 items
+"title":"The numbers range return"
+"description":"The numbers range return"
+"properties":{1 item
+"data":{2 items
+"type":"array"
+"items":{2 items
+"properties":{2 items
+"numeral":{2 items
+"type":"string"
+"example":"1"
+}
+"numeral_vernacular":{2 items
+"type":"string"
+"example":"১"
+}
+}
+"type":"object"
+}
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"v4_numbers_range"
+}
+}
+"v4_numbers.index":{2 items
+"properties":{1 item
+"data":{2 items
+"type":"array"
+"items":{2 items
+"properties":{3 items
+"id":{2 items
+"type":"string"
+"example":"bengali"
+}
+"description":{2 items
+"type":"string"
+"example":"description for bengali"
+}
+"notes":{2 items
+"type":"string"
+"example":"notes for bengali"
+}
+}
+"type":"object"
+}
+}
+}
+"type":"object"
+}
+"v4_numbers.show":{2 items
+"properties":{1 item
+"data":{1 item
+"$ref":"#/components/schemas/NumeralSystem"
+}
+}
+"type":"object"
+}
+"Bible":{5 items
+"title":"Bible"
+"description":"Bible"
+"properties":{10 items
+"custom_font_required":{3 items
+"title":"custom_font_required"
+"description":"Flag to mark if the bible has a custom font"
+"type":"boolean"
+}
+"id":{6 items
+"title":"id"
+"description":"The Archivist created Bible ID string. This will be between six and twelve letters usually starting with the iso639-3 code and ending with the acronym for the Bible"
+"type":"string"
+"maxLength":12
+"minLength":6
+"example":"ENGESV"
+}
+"language_id":{1 item
+"$ref":"#/components/schemas/Language/properties/id"
+}
+"date":{6 items
+"title":"date"
+"description":"The year the Bible was originally published"
+"type":"integer"
+"maximum":4
+"minimum":1
+"example":1963
+}
+"scope":{1 item
+"$ref":"#/components/schemas/BibleFilesetSize/properties/set_size_code"
+}
+"derived":{5 items
+"title":"derived"
+"description":"This field indicates the Bible from which the current Scriptures being described are derived."
+"type":"string"
+"example":"English New Revised Standard Version"
+"nullable":true
+}
+"copyright":{5 items
+"title":"copyright"
+"description":"A short copyright description for the bible text."
+"type":"string"
+"maxLength":191
+"example":"© 1999 Bible Society of Ghana"
+}
+"versification":{4 items
+"title":"versification"
+"description":"The versification system for ordering books and chapters"
+"type":"string"
+"enum":[11 items
+0:"protestant"
+1:"luther"
+2:"synodal"
+3:"german"
+4:"kjva"
+5:"vulgate"
+6:"lxx"
+7:"orthodox"
+8:"nrsva"
+9:"catholic"
+10:"finnish"
+]
+}
+"created_at":{4 items
+"title":"created_at"
+"description":"The timestamp at which the bible was originally created"
+"type":"string"
+"example":"2018-02-12 13:32:23"
+}
+"updated_at":{4 items
+"title":"updated_at"
+"description":"The timestamp at which the bible was last updated"
+"type":"string"
+"example":"2018-02-12 13:32:23"
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"Bible"
+}
+}
+"BibleBook":{5 items
+"title":"Bible Book"
+"description":"The Bible Book Model stores the vernacular book titles and chapters"
+"properties":{6 items
+"bible_id":{1 item
+"$ref":"#/components/schemas/Bible/properties/id"
+}
+"book_id":{1 item
+"$ref":"#/components/schemas/Book/properties/id"
+}
+"name":{5 items
+"title":"name"
+"description":"The name of the book in the language of the bible"
+"type":"string"
+"maxLength":191
+"example":"1 Corinthians"
+}
+"name_short":{5 items
+"title":"name_short"
+"description":"If the vernacular name has an abbreviated form, it will be stored hre"
+"type":"string"
+"maxLength":191
+"example":"1 Corinthians"
+}
+"chapters":{5 items
+"title":"chapters"
+"description":"A string of the chapters in the book separated by a comma"
+"type":"string"
+"maxLength":491
+"example":"1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16"
+}
+"book_seq":{5 items
+"title":"book_seq"
+"description":"The ordering provided by the licensor in the USX file, this column * would likely populated for audio and video where there is no text"
+"type":"string"
+"maxLength":4
+"example":"B07"
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"BibleBook"
+}
+}
+"BibleFile":{6 items
+"title":"BibleFile"
+"description":"The Bible File Model communicates information about biblical files stored in S3"
+"required":[1 item
+0:"filename"
+]
+"properties":{11 items
+"id":{5 items
+"title":"id"
+"description":"The id"
+"type":"integer"
+"minimum":0
+"example":4
+}
+"book_id":{4 items
+"title":"book_id"
+"description":"The book_id"
+"type":"string"
+"example":"MAT"
+}
+"chapter_start":{4 items
+"title":"chapter_start"
+"description":"The chapter_start"
+"type":"string"
+"example":"4"
+}
+"verse_sequence":{5 items
+"title":"verse_sequence"
+"description":"The starting verse for the bible file but with format = integer"
+"type":"integer"
+"minimum":1
+"example":10
+}
+"chapter_end":{5 items
+"title":"chapter_end"
+"description":"If the Bible File spans multiple chapters this field indicates the last chapter of the selection"
+"type":"string"
+"example":"5"
+"nullable":true
+}
+"verse_start":{4 items
+"title":"verse_start"
+"description":"The starting verse at which the BibleFile reference begins"
+"type":"string"
+"example":"5"
+}
+"verse_end":{5 items
+"title":"verse_end"
+"description":"If the Bible File spans multiple verses this value will indicate the last verse in that reference. This value is inclusive, so for the reference John 1:1-4. The value would be 4 and the reference would contain verse 4."
+"type":"string"
+"example":"5"
+"nullable":true
+}
+"verse_text":{4 items
+"title":"verse_text"
+"description":"If the BibleFile model returns text instead of a file_name this field will contain it."
+"type":"string"
+"example":"And God said unto Abraham, And as for thee, thou shalt keep my covenant, thou, and thy seed after thee throughout their generations."
+}
+"file_name":{5 items
+"title":"file_name"
+"description":"The file_name"
+"type":"string"
+"maxLength":191
+"example":"ACHBSU_70_MAT_1.html"
+}
+"file_size":{4 items
+"title":"file_size"
+"description":"The file size"
+"type":"integer"
+"example":5486618
+}
+"duration":{6 items
+"title":"duration"
+"description":"If the file has a set length of time, this field indicates that time in milliseconds"
+"type":"integer"
+"minimum":0
+"example":683
+"nullable":true
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"BibleFile"
+}
+}
+"BibleFileTimestamp":{5 items
+"title":"Bible File Timestamp"
+"description":"The Bible File Timestamp tag model partitions the file into verse by verse sections"
+"properties":{5 items
+"id":{4 items
+"title":"file_id"
+"description":"The incrementing id of the file timestamp"
+"type":"integer"
+"minimum":1
+}
+"verse_start":{5 items
+"title":"verse_start"
+"description":"The starting verse for the file timestamp"
+"type":"string"
+"minimum":1
+"example":"1a"
+}
+"verse_end":{5 items
+"title":"verse_end"
+"description":"The ending verse for the file timestamp"
+"type":"integer"
+"minimum":1
+"example":10
+}
+"verse_sequence":{5 items
+"title":"verse_sequence"
+"description":"The starting verse for the bible file but with format = integer"
+"type":"integer"
+"minimum":1
+"example":10
+}
+"timestamp":{5 items
+"title":"timestamp"
+"description":"The time (in seconds) represented by the timestamp"
+"type":"number"
+"minimum":1
+"example":10.19
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"BibleFileTimestamp"
+}
+}
+"BibleFileset":{5 items
+"title":"Bible Fileset"
+"description":"BibleFileset"
+"properties":{3 items
+"id":{6 items
+"title":"id"
+"description":"The fileset id"
+"type":"string"
+"maxLength":16
+"minLength":6
+"example":"ENGESV"
+}
+"set_type_code":{1 item
+"$ref":"#/components/schemas/BibleFilesetType/properties/set_type_code"
+}
+"set_size_code":{1 item
+"$ref":"#/components/schemas/BibleFilesetSize/properties/set_size_code"
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"BibleFileset"
+}
+}
+"BibleFilesetCopyright":{5 items
+"title":"Bible Fileset Copyright"
+"description":"BibleFilesetCopyright"
+"properties":{4 items
+"copyright_date":{4 items
+"title":"copyright_date"
+"description":"The copyright date created copyright"
+"type":"string"
+"example":"2014"
+}
+"copyright":{4 items
+"title":"copyright"
+"description":"The copyright"
+"type":"string"
+"example":"© Ethnos360"
+}
+"copyright_description":{4 items
+"title":"copyright_description"
+"description":"The copyright description"
+"type":"string"
+"example":"© Ethnos360"
+}
+"open_access":{4 items
+"title":"open_access"
+"description":"The open_access description"
+"type":"integer"
+"example":1
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"BibleFilesetCopyright"
+}
+}
+"BibleFilesetSize":{6 items
+"title":"BibleFilesetSize"
+"description":"The Bible fileset size model communicates information about generalized fileset sizes"
+"required":[1 item
+0:"filename"
+]
+"properties":{3 items
+"id":{5 items
+"title":"id"
+"description":"The id"
+"type":"integer"
+"minimum":0
+"example":4
+}
+"set_size_code":{5 items
+"title":"set_size_code"
+"description":"The id"
+"type":"string"
+"maxLength":9
+"example":"NTPOTP"
+}
+"name":{5 items
+"title":"name"
+"description":"The name"
+"type":"string"
+"maxLength":191
+"example":"New Testament & Old Testament Portions"
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"BibleFilesetSize"
+}
+}
+"BibleFilesetType":{6 items
+"title":"Bible Fileset Type"
+"description":"The Bible Fileset Type model communicates general metadata about the bible_filesets.set_size_code"
+"required":[1 item
+0:"filename"
+]
+"properties":{5 items
+"id":{3 items
+"title":"id"
+"description":""
+"type":"string"
+}
+"set_type_code":{5 items
+"title":"set_type_code"
+"description":"The set_type_code indicating the type of the fileset"
+"type":"string"
+"maxLength":18
+"example":"audio_drama"
+}
+"name":{4 items
+"title":"name"
+"description":"The name of the fileset type"
+"type":"string"
+"example":"Dramatized Audio"
+}
+"created_at":{3 items
+"title":"created_at"
+"description":""
+"type":"string"
+}
+"updated_at":{3 items
+"title":"updated_at"
+"description":""
+"type":"string"
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"BibleFilesetType"
+}
+}
+"BibleLink":{5 items
+"title":"BibleLink"
+"description":"BibleLink"
+"properties":{9 items
+"id":{3 items
+"title":"id"
+"description":""
+"type":"string"
+}
+"bible_id":{1 item
+"$ref":"#/components/schemas/Bible/properties/id"
+}
+"type":{4 items
+"title":"type"
+"description":"The type of link, for example, web, pdf, print"
+"type":"string"
+"example":"web"
+}
+"url":{4 items
+"title":"url"
+"description":"URL of linked content"
+"type":"string"
+"example":"http://bibles.org/versions/aai-AAINT"
+}
+"title":{4 items
+"title":"title"
+"description":""
+"type":"string"
+"example":"BibleSearch"
+}
+"organization_id":{1 item
+"$ref":"#/components/schemas/Organization/properties/id"
+}
+"created_at":{3 items
+"title":"created_at"
+"description":""
+"type":"string"
+}
+"updated_at":{3 items
+"title":"updated_at"
+"description":""
+"type":"string"
+}
+"provider":{4 items
+"title":"provider"
+"description":"Organization providing the content referenced in the link"
+"type":"string"
+"example":"American Bible Society"
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"BibleLink"
+}
+}
+"BibleOrganization":{5 items
+"title":"BibleOrganization"
+"description":"BibleOrganization"
+"properties":{5 items
+"bible_id":{1 item
+"$ref":"#/components/schemas/Bible/properties/id"
+}
+"organization_id":{1 item
+"$ref":"#/components/schemas/Organization/properties/id"
+}
+"relationship_type":{4 items
+"title":"relationship_type"
+"description":"Relationship between Bible and Organization"
+"type":"string"
+"example":"publisher"
+}
+"created_at":{3 items
+"title":"created_at"
+"description":""
+"type":"string"
+}
+"updated_at":{3 items
+"title":"updated_at"
+"description":""
+"type":"string"
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"BibleOrganization"
+}
+}
+"BibleTranslation":{5 items
+"title":"BibleTranslation"
+"description":"BibleTranslation"
+"properties":{10 items
+"id":{3 items
+"title":"id"
+"description":""
+"type":"string"
+}
+"iso":{1 item
+"$ref":"#/components/schemas/Language/properties/id"
+}
+"bible_id":{1 item
+"$ref":"#/components/schemas/Bible/properties/id"
+}
+"vernacular":{3 items
+"title":"vernacular"
+"type":"string"
+"example":"La Palabra De Dios Para Todos"
+}
+"vernacular_trade":{3 items
+"title":"vernacular_trade"
+"description":""
+"type":"string"
+}
+"name":{3 items
+"title":"name"
+"type":"string"
+"example":"The Word of God for All 2014"
+}
+"type":{3 items
+"title":"type"
+"description":""
+"type":"string"
+}
+"features":{3 items
+"title":"features"
+"description":""
+"type":"string"
+}
+"description":{4 items
+"title":"description"
+"description":"Details on the translation"
+"type":"string"
+"example":"Aguaruna is an indigenous American language of the Jivaroan family..."
+}
+"notes":{3 items
+"title":"notes"
+"description":""
+"type":"string"
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"BibleTranslation"
+}
+}
+"BibleVerse":{5 items
+"title":"BibleVerse"
+"description":"The BibleVerse model stores the unformatted Bible Text for searching & JSON returned verses"
+"properties":{6 items
+"id":{3 items
+"title":"id"
+"description":"The incrementing id for the Bible Verse"
+"type":"integer"
+}
+"book_id":{1 item
+"$ref":"#/components/schemas/Book/properties/id"
+}
+"chapter":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/chapter_start"
+}
+"verse_number":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/verse_start"
+}
+"verse_sequence":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/verse_sequence"
+}
+"verse_text":{3 items
+"title":"verse_text"
+"description":"The text of the Bible Verse"
+"type":"string"
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"BibleVerse"
+}
+}
+"Book":{5 items
+"title":"Book"
+"description":"The Book model communicates information about the canonical books of the Bible"
+"properties":{14 items
+"id":{6 items
+"title":"id"
+"description":"The USFM 2.4 id for the books of the Bible"
+"type":"string"
+"maxLength":3
+"minLength":3
+"example":"MAT"
+}
+"id_usfx":{5 items
+"title":"id_usfx"
+"description":"The usfx id for the books of the Bible"
+"type":"string"
+"maxLength":2
+"minLength":2
+}
+"id_osis":{5 items
+"title":"id_osis"
+"description":"The OSIS id for the books of the Bible"
+"type":"string"
+"maxLength":12
+"minLength":2
+}
+"protestant_order":{4 items
+"title":"protestant_order"
+"description":"The standard book order for the `protestant_order` in ascending order from Genesis onwards"
+"type":"integer"
+"minimum":0
+}
+"testament_order":{4 items
+"title":"testament_order"
+"description":"The standard book order within a testament in ascending order from Genesis to Malachi, and Matthew to Revelations"
+"type":"integer"
+"minimum":0
+}
+"book_testament":{6 items
+"title":"book_testament"
+"description":"A short code identifying the testament containing the book"
+"type":"string"
+"maxLength":2
+"minLength":2
+"enum":[3 items
+0:"OT"
+1:"NT"
+2:"AP"
+]
+}
+"book_group":{4 items
+"title":"book_group"
+"description":"An english name for the section of books that current book can be categorized in"
+"type":"string"
+"enum":[10 items
+0:"Historical Books"
+1:"Pauline Epistles"
+2:"General Epistles"
+3:"Apostolic History"
+4:"Minor Prophets"
+5:"Major Prophets"
+6:"The Law"
+7:"Wisdom Books"
+8:"Gospels"
+9:"Apocalypse"
+]
+}
+"chapters":{5 items
+"title":"chapters"
+"description":"The book's number of chapters"
+"type":"array"
+"items":{1 item
+"type":"integer"
+}
+"nullable":true
+}
+"verses":{4 items
+"title":"verses"
+"description":"The book's number of verses"
+"type":"integer"
+"nullable":true
+}
+"name":{3 items
+"title":"name"
+"description":"The English name of the book"
+"type":"string"
+}
+"notes":{3 items
+"title":"notes"
+"description":"Any archivist notes about the book"
+"type":"string"
+}
+"description":{3 items
+"title":"description"
+"description":"The book's description"
+"type":"string"
+}
+"created_at":{3 items
+"title":"created_at"
+"description":"The timestamp for the books creation"
+"type":"string"
+}
+"updated_at":{3 items
+"title":"updated_at"
+"description":"The timestamp for the last update of the book"
+"type":"string"
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"Book"
+}
+}
+"BookTranslation":{5 items
+"title":"BookTranslation"
+"description":"The Book Translation's model"
+"properties":{8 items
+"iso":{1 item
+"$ref":"#/components/schemas/Language/properties/iso"
+}
+"book_id":{1 item
+"$ref":"#/components/schemas/Book/properties/id"
+}
+"name":{3 items
+"title":"name"
+"description":"The translated name of the biblical book"
+"type":"string"
+}
+"name_long":{3 items
+"title":"name_long"
+"description":"The long form of the translated name"
+"type":"string"
+}
+"name_short":{3 items
+"title":"name_short"
+"description":"The short form of the translated name"
+"type":"string"
+}
+"name_abbreviation":{3 items
+"title":"name_abbreviation"
+"description":"The abbreviated form of the translated name"
+"type":"string"
+}
+"created_at":{3 items
+"title":"created_at"
+"description":"The timestamp that the translated name was originally created"
+"type":"string"
+}
+"updated_at":{3 items
+"title":"updated_at"
+"description":"The timestamp that the translated name was last updated"
+"type":"string"
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"BookTranslation"
+}
+}
+"Commentary":{5 items
+"title":"Commentary"
+"description":"Commentary"
+"properties":{6 items
+"id":{6 items
+"title":"id"
+"description":"The unique ID for the commentary, for example the English Treasure of Scripture Knowledge id is ENGTSK"
+"type":"string"
+"maxLength":12
+"minLength":6
+"example":"ENGTSK"
+}
+"type":{6 items
+"title":"type"
+"description":"The genre of commentary being described"
+"type":"string"
+"maxLength":11
+"minLength":9
+"enum":[4 items
+0:"critical"
+1:"devotional"
+2:"pastoral"
+3:"exegetical"
+]
+}
+"author":{4 items
+"title":"type"
+"description":"The author of the commentary"
+"type":"string"
+"maxLength":191
+}
+"date":{4 items
+"title":"date"
+"description":"The year the commentary was published"
+"type":"integer"
+"example":1991
+}
+"features":{4 items
+"title":"date"
+"description":"The year the commentary was published"
+"type":"integer"
+"example":1991
+}
+"publisher":{4 items
+"title":"publisher"
+"description":"The original publisher of the commentary"
+"type":"string"
+"example":1991
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"Commentary"
+}
+}
+"CommentaryTranslation":{5 items
+"title":"CommentaryTranslation"
+"description":"CommentaryTranslation"
+"properties":{5 items
+"language_id":{1 item
+"$ref":"#/components/schemas/CommentaryTranslation/properties/language_id"
+}
+"commentary_id":{1 item
+"$ref":"#/components/schemas/Commentary/properties/id"
+}
+"vernacular":{2 items
+"description":"$vernacular"
+"type":"string"
+}
+"name":{2 items
+"description":"$name"
+"type":"string"
+}
+"description":{2 items
+"description":"$description"
+"type":"string"
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"CommentaryTranslation"
+}
+}
+"Lexicon":{5 items
+"title":"Lexicon"
+"description":"Lexicon"
+"properties":{8 items
+"id":{7 items
+"title":"id"
+"description":"Strongs id for the lexical entry"
+"type":"string"
+"maxLength":5
+"minLength":2
+"pattern":"/^[G||H]\d\d?\d?\d?$/"
+"example":"G1055"
+}
+"base_word":{5 items
+"title":"base_word"
+"description":"The Greek or Hebrew word being defined"
+"type":"string"
+"maxLength":64
+"example":"γαλήνη"
+}
+"usage":{4 items
+"title":"usage"
+"description":""
+"type":"string"
+"example":"calm"
+}
+"definition":{3 items
+"title":"definition"
+"description":""
+"type":"string"
+}
+"derived":{3 items
+"title":"derived"
+"description":""
+"type":"string"
+}
+"part_of_speech":{3 items
+"title":"part_of_speech"
+"description":""
+"type":"string"
+}
+"aramaic":{3 items
+"title":"aramaic"
+"description":""
+"type":"string"
+}
+"comment":{3 items
+"title":"comment"
+"description":""
+"type":"string"
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"Lexicon"
+}
+}
+"Video":{5 items
+"title":"VideoTranslations"
+"description":"The Video model holds information about biblical films. It serves as a wrapper for all Video{Value} Models including VideoTags and VideoTranslations."
+"properties":{12 items
+"id":{3 items
+"title":"id"
+"description":""
+"type":"string"
+}
+"language_id":{3 items
+"title":"language_id"
+"description":""
+"type":"string"
+}
+"bible_id":{3 items
+"title":"bible_id"
+"description":""
+"type":"string"
+}
+"series":{3 items
+"title":"series"
+"description":""
+"type":"string"
+}
+"episode":{3 items
+"title":"episode"
+"description":""
+"type":"string"
+}
+"section":{3 items
+"title":"section"
+"description":""
+"type":"string"
+}
+"url":{3 items
+"title":"url"
+"description":""
+"type":"string"
+}
+"url_download":{3 items
+"title":"url_download"
+"description":""
+"type":"string"
+}
+"picture":{3 items
+"title":"picture"
+"description":""
+"type":"string"
+}
+"duration":{3 items
+"title":"duration"
+"description":""
+"type":"string"
+}
+"created_at":{3 items
+"title":"created_at"
+"description":""
+"type":"string"
+}
+"updated_at":{3 items
+"title":"updated_at"
+"description":""
+"type":"string"
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"VideoTranslations"
+}
+}
+"VideoTag":{5 items
+"title":"VideoTags"
+"description":"The VideoTags model holds miscellaneous information about the video model."
+"properties":{16 items
+"id":{3 items
+"title":"id"
+"description":"The incrementing id of the video tag"
+"type":"integer"
+}
+"video_id":{3 items
+"title":"video_id"
+"description":"The video id"
+"type":"integer"
+}
+"category":{3 items
+"title":"category"
+"description":"The category"
+"type":"integer"
+}
+"tag_type":{3 items
+"title":"category"
+"description":"The category"
+"type":"integer"
+}
+"tag":{3 items
+"title":"tag"
+"description":"The tag"
+"type":"string"
+}
+"language_id":{4 items
+"title":"tag"
+"description":"The language_id"
+"type":"integer"
+"nullable":true
+}
+"organization_id":{4 items
+"title":"organization_id"
+"description":"The language_id"
+"type":"integer"
+"nullable":true
+}
+"book_id":{4 items
+"title":"book_id"
+"description":"The book id"
+"type":"string"
+"nullable":true
+}
+"chapter_start":{4 items
+"title":"chapter_start"
+"description":"The starting chapter"
+"type":"integer"
+"nullable":true
+}
+"chapter_end":{4 items
+"title":"chapter_end"
+"description":"The ending chapter"
+"type":"integer"
+"nullable":true
+}
+"verse_start":{4 items
+"title":"verse_start"
+"description":"The verse_start"
+"type":"integer"
+"nullable":true
+}
+"verse_end":{4 items
+"title":"verse_end"
+"description":"The verse_end"
+"type":"integer"
+"nullable":true
+}
+"time_begin":{4 items
+"title":"time_begin"
+"description":"The time_begin"
+"type":"integer"
+"nullable":true
+}
+"time_end":{4 items
+"title":"time_end"
+"description":"The time_end"
+"type":"integer"
+"nullable":true
+}
+"created_at":{4 items
+"title":"created_at"
+"description":"The created_at"
+"type":"string"
+"nullable":true
+}
+"updated_at":{4 items
+"title":"updated_at"
+"description":"The updated_at"
+"type":"string"
+"nullable":true
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"VideoTags"
+}
+}
+"Country":{5 items
+"title":"Country"
+"description":"Country"
+"properties":{6 items
+"id":{7 items
+"title":"Country Iso 3166-1"
+"description":"The Country ID for the country aligning with the ISO 3166-1 standard"
+"type":"string"
+"maxLength":2
+"minLength":2
+"externalDocs":{2 items
+"description":"For more info please refer to the Iso Registration Authority"
+"url":"https://www.iso.org/iso-3166-country-codes.html"
+}
+"example":"AD"
+}
+"iso_a3":{7 items
+"title":"Country Iso 3166-3"
+"description":"The Country iso for the country aligning with the ISO 3166-3 standard"
+"type":"string"
+"maxLength":3
+"minLength":3
+"externalDocs":{2 items
+"description":"For more info please refer to the Iso Wiki"
+"url":"https://en.wikipedia.org/wiki/ISO_3166-3"
+}
+"example":"AND"
+}
+"fips":{7 items
+"title":"FIPS ID"
+"description":"The Country id for the country aligning with the FIPS standard of the United Nations"
+"type":"string"
+"maxLength":2
+"minLength":2
+"externalDocs":{2 items
+"description":"For more info please refer to the FIPS Wiki"
+"url":"https://en.wikipedia.org/wiki/List_of_FIPS_country_codes"
+}
+"example":"AN"
+}
+"continent":{6 items
+"title":"continent ID"
+"description":"The continent code for the country"
+"type":"string"
+"maxLength":2
+"minLength":2
+"example":"EU"
+}
+"name":{5 items
+"title":"Country Name"
+"description":"The name for the country in English"
+"type":"string"
+"maxLength":191
+"example":"Andorra"
+}
+"introduction":{4 items
+"title":"Country introduction"
+"description":"A brief description of the country in English"
+"type":"string"
+"example":"The landlocked Principality of Andorra is one of the smallest states in Europe, nestled high in the Pyrenees..."
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"Country"
+}
+}
+"Alphabet":{5 items
+"title":"Alphabet"
+"description":"Alphabet"
+"properties":{21 items
+"script":{7 items
+"title":"Alphabet Script"
+"description":"The Script ID for the alphabet aligning with the iso 15924 standard"
+"type":"string"
+"maxLength":4
+"minLength":4
+"externalDocs":{2 items
+"description":"For more info please refer to the Unicode Consortium"
+"url":"https://http://www.unicode.org/iso15924/"
+}
+"example":"Cans"
+}
+"name":{5 items
+"title":"Alphabet Name"
+"description":"The name of the alphabet in English"
+"type":"string"
+"maxLength":191
+"example":"Unified Canadian Aboriginal"
+}
+"unicode_pdf":{6 items
+"title":"Unicode PDF"
+"description":"A url to a reference PDF for the alphabet"
+"type":"string"
+"maxLength":191
+"example":"https://unicode.org/charts/PDF/U1400.pdf"
+"nullable":true
+}
+"family":{5 items
+"title":"Family"
+"description":"The linguistic family the alphabet can be categorized within"
+"type":"string"
+"example":"American"
+"nullable":true
+}
+"type":{5 items
+"title":"Type"
+"description":"The type of alphabet be described"
+"type":"string"
+"example":"abugida"
+"nullable":true
+}
+"white_space":{4 items
+"title":"White Space"
+"description":"The usage white space within the alphabet"
+"type":"string"
+"example":"between words"
+}
+"open_type_tag":{4 items
+"title":"Open Type Tag"
+"description":"The open type tag of the alphabet"
+"type":"string"
+"example":"cans"
+}
+"complex_positioning":{4 items
+"title":"Open Type Tag"
+"description":"The open type tag of the alphabet"
+"type":"string"
+"example":"no"
+}
+"requires_font":{4 items
+"title":"Requires Font"
+"description":"If the Alphabet generally requires the use of a font to display correctly online"
+"type":"boolean"
+"example":false
+}
+"unicode":{4 items
+"title":"Unicode"
+"description":"If the Alphabet is fully supported by the unicode spec"
+"type":"boolean"
+"example":true
+}
+"diacritics":{4 items
+"title":"Diacritics"
+"description":"If the Alphabet contains diacritics"
+"type":"boolean"
+"example":true
+}
+"contextual_forms":{4 items
+"title":"Contextual Forms"
+"description":"If the Alphabet contains contextual forms"
+"type":"boolean"
+"example":false
+}
+"reordering":{5 items
+"title":"Reordering"
+"description":"If the Alphabet contains reordering"
+"type":"boolean"
+"example":false
+"nullable":true
+}
+"case":{5 items
+"title":"Case"
+"description":"If the Alphabet utilizes different cases"
+"type":"boolean"
+"example":false
+"nullable":true
+}
+"split_graphs":{5 items
+"title":"Split Graphs"
+"description":"If the Alphabet contains letters that are written using two separate distinct elements."
+"type":"boolean"
+"externalDocs":{2 items
+"description":"For more info please refer to the Script Source Feature Definitions"
+"url":"http://scriptsource.org/cms/scripts/page.php?item_id=entry_detail&uid=cq3q4pwuah#50d6cb6e"
+}
+"example":false
+}
+"status":{6 items
+"title":"Status"
+"description":"The status of the alphabet"
+"type":"string"
+"enum":[4 items
+0:"Current"
+1:"Historical"
+2:"Fictional"
+3:"Unclear"
+]
+"externalDocs":{2 items
+"description":"For more info please refer to the Script Source Feature Definitions"
+"url":"http://scriptsource.org/cms/scripts/page.php?item_id=entry_detail&uid=cq3q4pwuah#71259eae"
+}
+"example":"Current"
+}
+"baseline":{6 items
+"title":"Baseline"
+"description":"The alignment of the text within the alphabet"
+"type":"string"
+"enum":[4 items
+0:"Hanging"
+1:"Centered"
+2:"Bottom"
+3:"Vertical"
+]
+"externalDocs":{2 items
+"description":"For more info please refer to the Script Source Feature Definitions"
+"url":"http://scriptsource.org/cms/scripts/page.php?item_id=entry_detail&uid=cq3q4pwuah#a4a32c47"
+}
+"example":"Bottom"
+}
+"ligatures":{6 items
+"title":"Ligatures"
+"description":"Indicates on if letters may be or are required to be joined as a single glyph"
+"type":"string"
+"enum":[3 items
+0:"required"
+1:"optional"
+2:"none"
+]
+"externalDocs":{2 items
+"description":"For more information please refer to the Script Source Feature Definitions"
+"url":"http://scriptsource.org/cms/scripts/page.php?item_id=entry_detail&uid=cq3q4pwuah#3e655409"
+}
+"example":"none"
+}
+"direction":{7 items
+"title":"Direction"
+"description":"The direction that the alphabet is read"
+"type":"string"
+"enum":[3 items
+0:"rtl"
+1:"ltr"
+2:""
+]
+"externalDocs":{2 items
+"description":"For more information please refer to the Script Source Feature Definitions"
+"url":"http://scriptsource.org/cms/scripts/page.php?item_id=entry_detail&uid=cq3q4pwuah#02674a4e"
+}
+"example":"ltr"
+"nullable":true
+}
+"sample":{3 items
+"title":"Sample Image"
+"description":"A sample section of text for the alphabet"
+"type":"string"
+}
+"sample_img":{3 items
+"title":"Sample Image"
+"description":"A url to an image of the sample section of text for the alphabet"
+"type":"string"
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"Alphabet"
+}
+}
+"AlphabetFont":{5 items
+"title":"Alphabet Font"
+"description":"Alphabet Font"
+"properties":{8 items
+"id":{4 items
+"title":"Alphabet Font ID"
+"description":"The incrementing numeric id for the alphabet fonts"
+"type":"integer"
+"example":7
+}
+"font_name":{5 items
+"title":"Alphabet Font Name"
+"description":"The Font Name"
+"type":"string"
+"maxLength":191
+"example":"Noto Naskh Arabic"
+}
+"font_filename":{5 items
+"title":"Alphabet Font File Name"
+"description":"The File name for the font"
+"type":"string"
+"maxLength":191
+"example":"NotoNaskhArabic-Regular"
+}
+"font_weight":{6 items
+"title":"Alphabet Font Weight"
+"description":"The boldness of the font"
+"type":"integer"
+"minimum":100
+"example":400
+"nullable":true
+}
+"copyright":{6 items
+"title":"Alphabet copyright"
+"description":"The copyright of the font if any"
+"type":"string"
+"maxLength":191
+"example":"Creative Commons"
+"nullable":true
+}
+"url":{4 items
+"title":"Alphabet URL"
+"description":"The url to the font file"
+"type":"string"
+"example":"https://cdn.example.com/resources/fonts/NotoNaskhArabic-Regular.ttf"
+}
+"notes":{5 items
+"title":"Notes"
+"description":"Any notes for the font file name"
+"type":"string"
+"example":"notes specific to this font"
+"nullable":true
+}
+"italic":{5 items
+"title":"Italic"
+"description":"Determines if the font file contains or supports italics"
+"type":"boolean"
+"example":false
+"nullable":true
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"AlphabetFont"
+}
+}
+"Language":{5 items
+"title":"Language"
+"description":"Language"
+"properties":{18 items
+"id":{4 items
+"title":"id"
+"description":"The incrementing ID for the language"
+"type":"integer"
+"example":6411
+}
+"glotto_id":{5 items
+"title":"glotto_id"
+"description":"The glottolog ID for the language"
+"type":"string"
+"externalDocs":{2 items
+"description":"For more info please refer to the Glottolog"
+"url":"http://glottolog.org/"
+}
+"example":"stan1288"
+}
+"iso":{6 items
+"title":"iso"
+"description":"The iso 639-3 for the language"
+"type":"string"
+"maxLength":3
+"externalDocs":{2 items
+"description":"For more info"
+"url":"https://en.wikipedia.org/wiki/ISO_639-3"
+}
+"example":"spa"
+}
+"name":{5 items
+"title":"Name"
+"description":"The name of the language"
+"type":"string"
+"maxLength":191
+"example":"Spanish"
+}
+"maps":{4 items
+"title":"Maps"
+"description":"The general area where the language can be found"
+"type":"string"
+"example":"Andorra and France"
+}
+"development":{4 items
+"title":"Development"
+"description":"The development of the growth of the language"
+"type":"string"
+"example":"Fully developed. Bible: 1553-2000."
+}
+"use":{4 items
+"title":"use"
+"description":"The use of the language"
+"type":"string"
+"example":"60,000,000 L2 speakers."
+}
+"location":{3 items
+"title":"Location"
+"description":"The location of the language"
+"type":"string"
+}
+"area":{4 items
+"title":"Area"
+"description":"The area of the language"
+"type":"string"
+"example":"Central, south; Canary Islands. Also in Andorra, ..."
+}
+"population":{4 items
+"title":"Population"
+"description":"The estimated number of people that speak the language"
+"type":"number"
+"example":24900
+}
+"population_notes":{4 items
+"title":"Population Notes"
+"description":"Any notes regarding the estimated number of people"
+"type":"string"
+"example":"58,200,000 in United Kingdom (Crystal 2003). Population total all countries: 334,800,758."
+}
+"notes":{4 items
+"title":"Notes"
+"description":"Any notes regarding the language"
+"type":"string"
+"example":"The Aragonese dialect of Spanish is different from Aragonese language [arg]. Christian."
+}
+"typology":{4 items
+"title":"Typology"
+"description":"The language's Typology"
+"type":"string"
+"example":"SVO,prepositions,genitives, relatives after noun heads,articles, numerals before noun heads..."
+}
+"description":{4 items
+"title":"Description"
+"description":"The description of the language"
+"type":"string"
+"example":"language description"
+}
+"status":{4 items
+"title":"Status"
+"description":"A status of the language"
+"type":"string"
+"example":"6a"
+}
+"country_id":{4 items
+"title":"country_id"
+"description":"The primary country where the language is spoken"
+"type":"string"
+"example":"ES"
+}
+"rolv_code":{4 items
+"title":"rolv_code"
+"description":""
+"type":"string"
+"example":""
+}
+"deleted_at":{4 items
+"title":"deleted_at"
+"description":""
+"type":"string"
+"example":""
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"Language"
+}
+}
+"LanguageCode":{5 items
+"title":"Language Codes"
+"description":"Information regarding alternative language coding systems"
+"properties":{4 items
+"id":{4 items
+"title":"id"
+"description":"The incrementing id of the language Code"
+"type":"integer"
+"minimum":0
+}
+"language_id":{4 items
+"title":"language_id"
+"description":"The foreign key pointing to the incrementing id of the language"
+"type":"integer"
+"minimum":0
+}
+"source":{4 items
+"title":"source"
+"description":"The source pointing to the incrementing id of the language"
+"type":"string"
+"example":"Iso 639-2"
+}
+"code":{4 items
+"title":"code"
+"description":"The foreign code for the language"
+"type":"string"
+"example":"ab"
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"LanguageCode"
+}
+}
+"LanguageTranslation":{5 items
+"title":"Language Translation"
+"description":"Information regarding language translations"
+"properties":{7 items
+"id":{4 items
+"title":"id"
+"description":"The incrementing id of the language"
+"type":"integer"
+"minimum":0
+}
+"language_source_id":{5 items
+"title":"language_source_id"
+"description":"The incrementing id of the language_source"
+"type":"integer"
+"minimum":0
+"example":17
+}
+"language_translation_id":{5 items
+"title":"language_translation_id"
+"description":"The incrementing id of the language_translation"
+"type":"integer"
+"minimum":0
+"example":68
+}
+"name":{5 items
+"title":"name"
+"description":"The language translation name"
+"type":"string"
+"minimum":0
+"example":"Abkasies"
+}
+"priority":{6 items
+"title":"Priority"
+"description":"The priority of the language translation"
+"type":"integer"
+"maximum":255
+"minimum":0
+"example":0
+}
+"created_at":{3 items
+"title":"created_at"
+"description":"The timestamp at which the translation was created at"
+"type":"string"
+}
+"updated_at":{3 items
+"title":"updated_at"
+"description":"The timestamp at which the translation was last updated at"
+"type":"string"
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"LanguageTranslation"
+}
+}
+"NumeralSystem":{5 items
+"title":"Numeral System"
+"description":"NumeralSystem"
+"properties":{4 items
+"id":{5 items
+"title":"Numeral System Id"
+"description":"The id of the numberal system"
+"type":"string"
+"maxLength":20
+"example":"western-arabic"
+}
+"value":{6 items
+"title":"The integer value of the glyph"
+"description":"The integer value of the glyph"
+"type":"integer"
+"maximum":200
+"minimum":0
+"example":9
+}
+"glyph":{5 items
+"title":"The Vernacular Numeral"
+"description":"The numeral in the vernacular of the writing system"
+"type":"string"
+"maxLength":8
+"example":"੧"
+}
+"numeral_written":{4 items
+"title":"Alphabet Numeral Written"
+"description":"The word for the numeral in the vernacular of the writing system"
+"type":"string"
+"maxLength":8
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"NumeralSystem"
+}
+}
+"Asset":{5 items
+"title":"Asset"
+"description":"Asset"
+"properties":{5 items
+"id":{5 items
+"title":"id"
+"description":"The id of the Bucket"
+"type":"string"
+"maxLength":64
+"example":"dbp-prod"
+}
+"organization_id":{1 item
+"$ref":"#/components/schemas/Organization/properties/id"
+}
+"asset_type":{5 items
+"title":"asset_type"
+"description":"The type of asset being provided"
+"type":"string"
+"maxLength":12
+"example":"cloudfront"
+}
+"created_at":{3 items
+"title":"created_at"
+"description":"The timestamp at which the bucket was created"
+"type":"string"
+}
+"updated_at":{3 items
+"title":"updated_at"
+"description":"The timestamp at which the bucket was last updated"
+"type":"string"
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"Asset"
+}
+}
+"Organization":{5 items
+"title":"Organization"
+"description":"Organization"
+"properties":{19 items
+"id":{5 items
+"title":"id"
+"description":"The Organization's incrementing id"
+"type":"integer"
+"minimum":0
+"example":1
+}
+"slug":{5 items
+"title":"slug"
+"description":"The Organization's name"
+"type":"string"
+"maxLength":191
+"example":"american-bible-society"
+}
+"abbreviation":{5 items
+"title":"abbreviation"
+"description":"The Organization's abbreviation"
+"type":"string"
+"maxLength":6
+"nullable":true
+}
+"notes":{5 items
+"title":"notes"
+"description":"Archivist notes about the organization being described"
+"type":"string"
+"example":"freetext archivist note"
+"nullable":true
+}
+"primaryColor":{7 items
+"title":"primaryColor"
+"description":"The Organization's primary color derived from their logo"
+"type":"string"
+"maxLength":7
+"minLength":7
+"example":"#004b85"
+"nullable":true
+}
+"secondaryColor":{7 items
+"title":"secondaryColor"
+"description":"The Organization's secondary color derived from their logo"
+"type":"string"
+"maxLength":7
+"minLength":7
+"example":"#e2383f"
+"nullable":true
+}
+"inactive":{4 items
+"title":"inactive"
+"description":"If the organization has not responded to several attempts to contact this value will be set to true"
+"type":"boolean"
+"nullable":true
+}
+"url_facebook":{5 items
+"title":"url_facebook"
+"description":"The URL to the organization's facebook page"
+"type":"string"
+"maxLength":191
+"example":"https://facebook.com"
+}
+"url_website":{5 items
+"title":"url_website"
+"description":"The url to the Organization's website"
+"type":"string"
+"maxLength":191
+"example":"https://someorg.com"
+}
+"url_donate":{5 items
+"title":"url_donate"
+"description":"The url to the organization's donation page"
+"type":"string"
+"maxLength":191
+"example":"https://donate.someorg.com"
+}
+"url_twitter":{5 items
+"title":"url_twitter"
+"description":"The url to the organization's twitter page"
+"type":"string"
+"maxLength":191
+"example":"https://twitter.com"
+}
+"address":{5 items
+"title":"address"
+"description":"The Organization's address"
+"type":"string"
+"maxLength":191
+"example":"123 Main Street"
+}
+"address2":{5 items
+"title":"address2"
+"description":"The Organization's second line of the address"
+"type":"string"
+"maxLength":191
+"example":""
+}
+"city":{5 items
+"title":"city"
+"description":"The organization's city"
+"type":"string"
+"maxLength":191
+"example":"Any City"
+}
+"state":{5 items
+"title":"state"
+"description":"The Organization's state"
+"type":"string"
+"maxLength":191
+"example":"Some State"
+}
+"country":{5 items
+"title":"country"
+"description":"ThThe Organization's country"
+"type":"string"
+"maxLength":191
+"example":"00000-000"
+}
+"zip":{5 items
+"title":"zip"
+"description":"The Organization's zip"
+"type":"string"
+"maxLength":191
+"example":"Some Country"
+}
+"phone":{5 items
+"title":"phone"
+"description":"The Organization's phone number"
+"type":"string"
+"maxLength":191
+"example":"999-999-9999"
+}
+"email":{5 items
+"title":"email"
+"description":"The Organization's email address"
+"type":"string"
+"maxLength":191
+"example":"contact@organization.com"
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"Organization"
+}
+}
+"OrganizationTranslation":{5 items
+"title":"Organization Translation"
+"description":"The alternative names in different languages for an organization"
+"properties":{7 items
+"language_iso":{4 items
+"title":"language_iso"
+"description":"The iso code for the translation language"
+"type":"string"
+"minLength":3
+}
+"organization_id":{4 items
+"title":"id"
+"description":"The Organization's incrementing id"
+"type":"integer"
+"minimum":0
+}
+"vernacular":{3 items
+"title":"id"
+"description":"If the current translation is the primary/vernacular translation"
+"type":"boolean"
+}
+"alt":{3 items
+"title":"alt"
+"description":"If the current name is a secondary title for the organization"
+"type":"boolean"
+}
+"name":{4 items
+"title":"name"
+"description":"The current translated name for the organization"
+"type":"string"
+"maxLength":191
+}
+"description":{3 items
+"title":"description"
+"description":"The current translated description for the organization"
+"type":"string"
+}
+"description_short":{3 items
+"title":"description_short"
+"description":"The current translated shortened description for the organization"
+"type":"string"
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"OrganizationTranslation"
+}
+}
+"Plan":{4 items
+"title":"Plan"
+"description":"The User created Plan"
+"properties":{9 items
+"id":{4 items
+"title":"id"
+"description":"The plan id"
+"type":"integer"
+"minimum":0
+}
+"name":{3 items
+"title":"name"
+"description":"The name of the plan"
+"type":"string"
+}
+"user_id":{3 items
+"title":"user_id"
+"description":"The user that created the plan"
+"type":"string"
+}
+"featured":{3 items
+"title":"featured"
+"description":"If the plan is featured"
+"type":"boolean"
+}
+"thumbnail":{4 items
+"title":"thumbnail"
+"description":"The image url"
+"type":"string"
+"maxLength":191
+}
+"suggested_start_date":{4 items
+"title":"suggested_start_date"
+"description":"The suggested start date of the plan"
+"type":"string"
+"format":"date"
+}
+"draft":{3 items
+"title":"draft"
+"description":"If the plan is draft"
+"type":"boolean"
+}
+"updated_at":{4 items
+"title":"updated_at"
+"description":"The timestamp the plan was last updated at"
+"type":"string"
+"nullable":true
+}
+"created_at":{3 items
+"title":"created_at"
+"description":"The timestamp the plan was created at"
+"type":"string"
+}
+}
+"type":"object"
+}
+"PlanDay":{4 items
+"title":"Plan day"
+"description":"The day of a Plan"
+"properties":{3 items
+"completed":{3 items
+"title":"completed"
+"description":"If the plan day is completed"
+"type":"boolean"
+}
+"id":{3 items
+"title":"id"
+"description":"The plan day id"
+"type":"integer"
+}
+"playlist_id":{1 item
+"$ref":"#/components/schemas/Playlist/properties/id"
+}
+}
+"type":"object"
+}
+"UserPlan":{4 items
+"title":"UserPlan"
+"description":"The User Plan data"
+"properties":{2 items
+"start_date":{4 items
+"title":"start_date"
+"description":"The start date of the plan"
+"type":"string"
+"format":"date"
+}
+"percentage_completed":{3 items
+"title":"percentage_completed"
+"description":"The percentage completed of the plan"
+"type":"integer"
+}
+}
+"type":"object"
+}
+"Playlist":{4 items
+"title":"Playlist"
+"description":"The User created Playlist"
+"properties":{10 items
+"verses":{3 items
+"title":"verses"
+"description":"The playlist verses count"
+"type":"integer"
+}
+"following":{3 items
+"title":"following"
+"description":"If the current user follows the playlist"
+"type":"boolean"
+}
+"id":{4 items
+"title":"id"
+"description":"The playlist id"
+"type":"integer"
+"minimum":0
+}
+"external_content":{3 items
+"title":"name"
+"description":"The name of the playlist"
+"type":"string"
+}
+"name":{3 items
+"title":"external_content"
+"description":"The url to external content"
+"type":"string"
+}
+"user_id":{3 items
+"title":"user_id"
+"description":"The user that created the playlist"
+"type":"string"
+}
+"featured":{3 items
+"title":"featured"
+"description":"If the playlist is featured"
+"type":"boolean"
+}
+"updated_at":{4 items
+"title":"updated_at"
+"description":"The timestamp the playlist was last updated at"
+"type":"string"
+"nullable":true
+}
+"draft":{3 items
+"title":"draft"
+"description":"If the playlist is draft"
+"type":"boolean"
+}
+"created_at":{3 items
+"title":"created_at"
+"description":"The timestamp the playlist was created at"
+"type":"string"
+}
+}
+"type":"object"
+}
+"PlaylistItems":{4 items
+"title":"Playlist Item"
+"description":"The Playlist Item"
+"properties":{17 items
+"completed":{3 items
+"title":"completed"
+"description":"If the playlist item is completed"
+"type":"boolean"
+}
+"full_chapter":{3 items
+"title":"full_chapter"
+"description":"If the playlist item is a full chapter item"
+"type":"boolean"
+}
+"path":{3 items
+"title":"path"
+"description":"Hls path of the playlist item"
+"type":"string"
+}
+"metadata":{4 items
+"title":"metadata"
+"description":"Bible metadata info"
+"properties":{4 items
+"bible_id":{1 item
+"$ref":"#/components/schemas/Bible/properties/id"
+}
+"bible_name":{1 item
+"$ref":"#/components/schemas/BibleTranslation/properties/name"
+}
+"bible_vname":{1 item
+"$ref":"#/components/schemas/BibleTranslation/properties/name"
+}
+"book_name":{1 item
+"$ref":"#/components/schemas/BookTranslation/properties/name"
+}
+}
+"type":"object"
+}
+"id":{3 items
+"title":"id"
+"description":"The playlist item id"
+"type":"integer"
+}
+"playlist_id":{3 items
+"title":"playlist_id"
+"description":"The playlist id"
+"type":"integer"
+}
+"fileset_id":{3 items
+"title":"fileset_id"
+"description":"The fileset id"
+"type":"string"
+}
+"book_id":{3 items
+"title":"book_id"
+"description":"The book_id"
+"type":"string"
+}
+"chapter_start":{6 items
+"title":"chapter_start"
+"description":"The chapter_start"
+"type":"integer"
+"maximum":150
+"minimum":0
+"example":4
+}
+"chapter_end":{7 items
+"title":"chapter_end"
+"description":"If the Bible File spans multiple chapters this field indicates the last chapter of the selection"
+"type":"integer"
+"maximum":150
+"minimum":0
+"example":5
+"nullable":true
+}
+"verse_start":{6 items
+"title":"verse_start"
+"description":"The starting verse at which the BibleFile reference begins"
+"type":"string"
+"maximum":176
+"minimum":1
+"example":5
+}
+"verse_sequence":{6 items
+"title":"verse_sequence"
+"description":"The starting verse at which the BibleFile reference begins"
+"type":"integer"
+"maximum":176
+"minimum":1
+"example":5
+}
+"verse_end":{7 items
+"title":"verse_end"
+"description":"If the Bible File spans multiple verses this value will indicate the last verse in that reference. This value is inclusive, so for the reference John 1:1-4. The value would be 4 and the reference would contain verse 4."
+"type":"integer"
+"maximum":176
+"minimum":1
+"example":5
+"nullable":true
+}
+"duration":{3 items
+"title":"duration"
+"description":"The playlist item calculated duration"
+"type":"integer"
+}
+"verses":{3 items
+"title":"verses"
+"description":"The playlist item verses count"
+"type":"integer"
+}
+"updated_at":{4 items
+"title":"updated_at"
+"description":"The timestamp the playlist item was last updated at"
+"type":"string"
+"nullable":true
+}
+"created_at":{3 items
+"title":"created_at"
+"description":"The timestamp the playlist item was created at"
+"type":"string"
+}
+}
+"type":"object"
+}
+"Resource":{5 items
+"title":"Resource"
+"description":"Resource"
+"properties":{8 items
+"id":{4 items
+"title":"id"
+"description":"The Resource's incrementing id"
+"type":"integer"
+"minimum":0
+}
+"iso":{4 items
+"title":"iso"
+"description":"The Resource's iso"
+"type":"string"
+"minLength":3
+}
+"organization_id":{1 item
+"$ref":"#/components/schemas/Organization/properties/id"
+}
+"source_id":{4 items
+"title":"source_id"
+"description":"The owning organization's tracking id for the resource"
+"type":"string"
+"nullable":true
+}
+"cover":{4 items
+"title":"cover"
+"description":"The url to the main cover art for the resource"
+"type":"string"
+"nullable":true
+}
+"cover_thumbnail":{4 items
+"title":"cover_thumbnail"
+"description":"The url to the thumbnail cover art for the resource"
+"type":"string"
+"nullable":true
+}
+"date":{4 items
+"title":"date"
+"description":"The date the resource was originally published"
+"type":"string"
+"nullable":true
+}
+"type":{4 items
+"title":"type"
+"description":"The type of media the resource can be categorized as"
+"type":"string"
+"nullable":true
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"Resource"
+}
+}
+"AccessGroup":{5 items
+"title":"AccessGroup"
+"description":"The Access Group"
+"properties":{3 items
+"id":{3 items
+"title":"id"
+"description":"The incrementing id for each access group"
+"type":"integer"
+}
+"name":{3 items
+"title":"name"
+"description":"The name for each access group"
+"type":"string"
+}
+"description":{3 items
+"title":"description"
+"description":"The description for each access group"
+"type":"string"
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"AccessGroup"
+}
+}
+"AccessType":{5 items
+"title":"AccessType"
+"description":"The Access Type"
+"properties":{5 items
+"id":{3 items
+"title":"id"
+"description":"The incrementing id for each Access Type"
+"type":"integer"
+}
+"name":{3 items
+"title":"name"
+"description":"The name for each access type"
+"type":"string"
+}
+"country_id":{1 item
+"$ref":"#/components/schemas/Country/properties/id"
+}
+"continent":{1 item
+"$ref":"#/components/schemas/Country/properties/continent"
+}
+"allowed":{4 items
+"title":"allowed"
+"description":"If set to false, allowed will change the permission function from a whitelist to a blacklist."
+"type":"boolean"
+"minimum":0
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"AccessType"
+}
+}
+"Account":{5 items
+"title":"Account"
+"description":"The Account Model describes the connections between Users and their social accounts"
+"properties":{6 items
+"id":{5 items
+"title":"id"
+"description":"The incrementing ID for the account"
+"type":"integer"
+"minimum":0
+"example":"4"
+}
+"user_id":{3 items
+"title":"user_id"
+"description":"The user id for the user who has the account being described"
+"type":"string"
+}
+"provider_id":{4 items
+"title":"provider_id"
+"description":"The social account provider that the user has logged in with"
+"type":"string"
+"example":"facebook"
+}
+"provider_user_id":{4 items
+"title":"provider_user_id"
+"description":"The key of the provider for the account being described"
+"type":"string"
+"example":""
+}
+"created_at":{3 items
+"title":"created_at"
+"description":"The time the social account was originally connected to the user"
+"type":"string"
+}
+"updated_at":{3 items
+"title":"updated_at"
+"description":"The time the social account was last updated"
+"type":"string"
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"Account"
+}
+}
+"Profile":{5 items
+"title":"Profile"
+"description":"The Profile model communicates information about a user"
+"properties":{8 items
+"thoroughfare":{2 items
+"title":"Street Address"
+"type":"string"
+}
+"premise":{2 items
+"title":"Premise"
+"type":"string"
+}
+"sub_premise":{2 items
+"title":"Sub Premise"
+"type":"string"
+}
+"sex":{7 items
+"title":"The Gender of the User"
+"description":"This field aligns with the ISO/IEC 5218 Standard. Codes for the representation of human sexes is an international standard that defines a representation of human sexes through a language-neutral single-digit code."
+"type":"integer"
+"format":"int64"
+"minimum":0
+"enum":[4 items
+0:0
+1:1
+2:2
+3:9
+]
+"externalDocs":{2 items
+"description":"Read More about the standard"
+"url":"http://standards.iso.org/ittf/PubliclyAvailableStandards/c036266_ISO_IEC_5218_2004(E_F).zip"
+}
+}
+"sub_administrative_area":{3 items
+"title":"Sub Administrative Area"
+"description":"County or District"
+"type":"string"
+}
+"administrative_area":{3 items
+"title":"Administrative Area"
+"description":"State / Province / Region (ISO code when available)"
+"type":"string"
+}
+"zip":{3 items
+"title":"Zip"
+"description":"Postal code / ZIP Code"
+"type":"string"
+}
+"country_id":{1 item
+"$ref":"#/components/schemas/Country/properties/id"
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"Profile"
+}
+}
+"Project":{5 items
+"title":"Project"
+"description":"The Project's model"
+"properties":{10 items
+"id":{4 items
+"title":"id"
+"description":"The unique id for the project"
+"type":"string"
+"maxLength":24
+}
+"name":{4 items
+"title":"name"
+"description":"The name of the project"
+"type":"string"
+"maxLength":191
+}
+"url_avatar":{4 items
+"title":"url_avatar"
+"description":"The url to the logo / main identifying image for the project"
+"type":"string"
+"maxLength":191
+}
+"url_avatar_icon":{4 items
+"title":"url_avatar_icon"
+"description":"The url to the logo / main identifying image for the project in a form that is suitable for small images (less than 100 pixels)"
+"type":"string"
+"maxLength":191
+}
+"url_site":{4 items
+"title":"url_site"
+"description":"The url to the site that is currently making use of the API"
+"type":"string"
+"maxLength":191
+}
+"reset_path":{5 items
+"title":"reset_path"
+"description":"The url to the location that contains the password reset form. Note this should end with a / and expect the final url path item to be a token. Example: https://example.com/password/reset/ with the expectation of receiving https://example.com/password/reset/{TOKEN_ID}"
+"type":"string"
+"maxLength":191
+"example":"https://example.com/password/reset/"
+}
+"description":{3 items
+"title":"description"
+"description":"The description of the project and it's goals"
+"type":"string"
+}
+"deleted_at":{3 items
+"title":"description"
+"description":"The day the project was soft deleted"
+"type":"string"
+}
+"created_at":{3 items
+"title":"description"
+"description":"The day the project was added to the api"
+"type":"string"
+}
+"updated_at":{3 items
+"title":"updated_at"
+"description":"The day the project was last updated"
+"type":"string"
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"Project"
+}
+}
+"PushToken":{4 items
+"title":"Push Token"
+"description":"The User Push Token"
+"properties":{2 items
+"push_token":{3 items
+"title":"push_token"
+"description":"The device push notification token"
+"type":"string"
+}
+"platform":{3 items
+"title":"platform"
+"description":"The device platform (eg: android)"
+"type":"string"
+}
+}
+"type":"object"
+}
+"AnnotationTag":{5 items
+"title":"NoteTag"
+"description":"The NoteTag's model"
+"properties":{8 items
+"id":{4 items
+"title":"id"
+"description":"The unique incrementing id for each NoteTag"
+"type":"integer"
+"minimum":0
+}
+"note_id":{1 item
+"$ref":"#/components/schemas/Note/properties/id"
+}
+"bookmark_id":{1 item
+"$ref":"#/components/schemas/Bookmark/properties/id"
+}
+"highlight_id":{1 item
+"$ref":"#/components/schemas/Highlight/properties/id"
+}
+"type":{3 items
+"title":"type"
+"description":"The type of tag that this NoteTag is categorized within."
+"type":"string"
+}
+"value":{3 items
+"title":"value"
+"description":"The value to the type of NoteTag for this note."
+"type":"string"
+}
+"created_at":{3 items
+"title":"created_at"
+"description":"The timestamp the NoteTag was first created at"
+"type":"string"
+}
+"updated_at":{3 items
+"title":"updated_at"
+"description":"The timestamp the NoteTag was last updated"
+"type":"string"
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"NoteTag"
+}
+}
+"Bookmark":{5 items
+"title":"Bookmark"
+"description":"The User created Bookmark"
+"properties":{9 items
+"id":{4 items
+"title":"id"
+"description":"The unique incrementing id for each Bookmark"
+"type":"integer"
+"minimum":0
+}
+"book_id":{1 item
+"$ref":"#/components/schemas/Book/properties/id"
+}
+"chapter":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/chapter_start"
+}
+"verse_start":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/verse_start"
+}
+"verse_sequence":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/verse_sequence"
+}
+"user_id":{1 item
+"$ref":"#/components/schemas/User/properties/id"
+}
+"bible_id":{1 item
+"$ref":"#/components/schemas/Bible/properties/id"
+}
+"updated_at":{4 items
+"title":"updated_at"
+"description":"The timestamp the Note was last updated at"
+"type":"string"
+"nullable":true
+}
+"created_at":{3 items
+"title":"created_at"
+"description":"The timestamp the note was created at"
+"type":"string"
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"Bookmark"
+}
+}
+"Highlight":{5 items
+"title":"Highlight"
+"description":"The Highlight model"
+"properties":{13 items
+"id":{4 items
+"title":"id"
+"description":"The highlight id"
+"type":"integer"
+"minimum":0
+}
+"user_id":{3 items
+"title":"user_id"
+"description":"The user that created the highlight"
+"type":"string"
+}
+"bible_id":{1 item
+"$ref":"#/components/schemas/Bible/properties/id"
+}
+"book_id":{1 item
+"$ref":"#/components/schemas/Book/properties/id"
+}
+"chapter":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/chapter_start"
+}
+"highlighted_color":{4 items
+"title":"highlighted_color"
+"description":"The highlight's highlighted color in either hex, rgb, or rgba notation."
+"type":"string"
+"example":"#4488bb"
+}
+"verse_start":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/verse_start"
+}
+"verse_sequence":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/verse_sequence"
+}
+"verse_end":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/verse_end"
+}
+"reference":{1 item
+"type":"string"
+}
+"project_id":{1 item
+"$ref":"#/components/schemas/Project/properties/id"
+}
+"highlight_start":{4 items
+"title":"highlight_start"
+"description":"The number of words from the beginning of the verse to start the highlight at. For example, if the verse Genesis 1:1 had a `highlight_start` of 4 and a highlighted_words equal to 2. The result would be: In the beginning `[God created]` the heavens and the earth."
+"type":"integer"
+"minimum":0
+}
+"highlighted_words":{3 items
+"title":"highlighted_words"
+"description":"The number of words being highlighted. For example, if the verse Genesis 1:1 had a `highlight_start` of 4 and a highlighted_words equal to 2. The result would be: In the beginning `[God created]` the heavens and the earth."
+"type":"integer"
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"Highlight"
+}
+}
+"Note":{5 items
+"title":"Note"
+"description":"The Note's model"
+"properties":{14 items
+"verse_text":{3 items
+"title":"verse_text"
+"description":"The text of the Bible Verse"
+"type":"string"
+}
+"bible_name":{3 items
+"title":"bible_name"
+"description":"Bible name"
+"type":"string"
+}
+"id":{4 items
+"title":"id"
+"description":"The unique incrementing id for each NoteTag"
+"type":"integer"
+"minimum":0
+}
+"book_id":{1 item
+"$ref":"#/components/schemas/Book/properties/id"
+}
+"chapter":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/chapter_start"
+}
+"verse_sequence":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/verse_sequence"
+}
+"verse_start":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/verse_start"
+}
+"verse_end":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/verse_end"
+}
+"user_id":{1 item
+"$ref":"#/components/schemas/User/properties/id"
+}
+"bible_id":{1 item
+"$ref":"#/components/schemas/Bible/properties/id"
+}
+"reference_id":{3 items
+"title":"reference_id"
+"description":"The unique incrementing id for each NoteTag"
+"type":"string"
+}
+"notes":{4 items
+"title":"notes"
+"description":"The body of the notes"
+"type":"string"
+"nullable":true
+}
+"created_at":{3 items
+"title":"created_at"
+"description":"The timestamp the note was created at"
+"type":"string"
+}
+"updated_at":{4 items
+"title":"updated_at"
+"description":"The timestamp the Note was last updated at"
+"type":"string"
+"nullable":true
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"Note"
+}
+}
+"User":{5 items
+"title":"User"
+"description":"The User model communicates information about everyone involved with the project"
+"properties":{8 items
+"id":{4 items
+"title":"id"
+"description":"The unique id for the user"
+"type":"integer"
+"minimum":1
+}
+"name":{5 items
+"title":"name"
+"description":"The name of the user"
+"type":"string"
+"maxLength":191
+"example":"Elu Thingol"
+}
+"password":{5 items
+"title":"password"
+"description":"The password for the user's account"
+"type":"string"
+"format":"password"
+"maxLength":191
+}
+"nickname":{5 items
+"title":"nickname"
+"description":"The preferred name for the user or an informal means of addressing them"
+"type":"string"
+"example":"Elwë"
+"nullable":true
+}
+"avatar":{5 items
+"title":"avatar"
+"description":"The url to the user's profile picture"
+"type":"string"
+"example":"https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"
+"nullable":true
+}
+"email":{5 items
+"title":"email"
+"description":"The user's email address"
+"type":"string"
+"format":"email"
+"example":"thingol@valinor.org"
+}
+"verified":{4 items
+"title":"verified"
+"description":"If the user has verified the email address they've provided or if they're connected via a social account"
+"type":"boolean"
+"example":true
+}
+"email_token":{4 items
+"title":"email_token"
+"description":"The token sent to the user to verify that user's email"
+"type":"string"
+"example":"B95p56KqHrz8D3w"
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"User"
+}
+}
+"v4_alphabets_all_response":{5 items
+"title":"The all alphabets response"
+"description":"The minimized alphabet return for the all alphabets route"
+"properties":{1 item
+"data":{2 items
+"type":"array"
+"items":{2 items
+"properties":{5 items
+"name":{1 item
+"$ref":"#/components/schemas/Alphabet/properties/name"
+}
+"script":{1 item
+"$ref":"#/components/schemas/Alphabet/properties/script"
+}
+"family":{1 item
+"$ref":"#/components/schemas/Alphabet/properties/family"
+}
+"type":{1 item
+"$ref":"#/components/schemas/Alphabet/properties/type"
+}
+"direction":{1 item
+"$ref":"#/components/schemas/Alphabet/properties/direction"
+}
+}
+"type":"object"
+}
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"v4_alphabets_all_response"
+}
+}
+"v4_alphabets_one_response":{5 items
+"title":"The single alphabet response"
+"description":"The full alphabet return for the single alphabet route"
+"properties":{1 item
+"data":{2 items
+"properties":{8 items
+"name":{1 item
+"$ref":"#/components/schemas/Alphabet/properties/name"
+}
+"script":{1 item
+"$ref":"#/components/schemas/Alphabet/properties/script"
+}
+"family":{1 item
+"$ref":"#/components/schemas/Alphabet/properties/family"
+}
+"type":{1 item
+"$ref":"#/components/schemas/Alphabet/properties/type"
+}
+"direction":{1 item
+"$ref":"#/components/schemas/Alphabet/properties/direction"
+}
+"fonts":{2 items
+"type":"array"
+"items":{1 item
+"$ref":"#/components/schemas/AlphabetFont"
+}
+}
+"languages":{2 items
+"type":"array"
+"items":{1 item
+"$ref":"#/components/schemas/Language"
+}
+}
+"bibles":{2 items
+"type":"array"
+"items":{1 item
+"$ref":"#/components/schemas/Bible"
+}
+}
+}
+"type":"object"
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"v4_alphabets_one_response"
+}
+}
+"v4_audio_timestamps":{5 items
+"title":"v4_audio_timestamps"
+"description":"The v4_audio_timestamps response"
+"properties":{1 item
+"data":{2 items
+"type":"array"
+"items":{2 items
+"properties":{4 items
+"book":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/book_id"
+}
+"chapter":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/chapter_start"
+}
+"verse_start":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/verse_start"
+}
+"timestamp":{1 item
+"$ref":"#/components/schemas/BibleFileTimestamp/properties/timestamp"
+}
+}
+"type":"object"
+}
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"v4_audio_timestamps"
+}
+}
+"v4_bible.all":{5 items
+"title":"v4_bible.all"
+"description":"The bibles being returned"
+"properties":{2 items
+"data":{2 items
+"type":"array"
+"items":{2 items
+"properties":{9 items
+"abbr":{1 item
+"$ref":"#/components/schemas/Bible/properties/id"
+}
+"name":{1 item
+"$ref":"#/components/schemas/BibleTranslation/properties/name"
+}
+"vname":{1 item
+"$ref":"#/components/schemas/BibleTranslation/properties/name"
+}
+"language":{1 item
+"$ref":"#/components/schemas/Language/properties/name"
+}
+"language_autonym":{1 item
+"$ref":"#/components/schemas/LanguageTranslation/properties/name"
+}
+"language_altNames":{1 item
+"$ref":"#/components/schemas/LanguageTranslation/properties/name"
+}
+"iso":{1 item
+"$ref":"#/components/schemas/Language/properties/iso"
+}
+"date":{1 item
+"$ref":"#/components/schemas/Bible/properties/date"
+}
+"filesets":{2 items
+"properties":{1 item
+"dbp-prod":{2 items
+"type":"array"
+"items":{1 item
+"$ref":"#/components/schemas/BibleFileset"
+}
+}
+}
+"type":"object"
+}
+}
+"type":"object"
+}
+}
+"meta":{1 item
+"$ref":"#/components/schemas/pagination"
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"v4_bible.all"
+}
+}
+"v4_bible.search":{5 items
+"title":"v4_bible.search"
+"description":"The bible being returned"
+"type":"array"
+"items":{2 items
+"properties":{3 items
+"abbr":{1 item
+"$ref":"#/components/schemas/Bible/properties/id"
+}
+"name":{1 item
+"$ref":"#/components/schemas/BibleTranslation/properties/name"
+}
+"language_id":{1 item
+"$ref":"#/components/schemas/Language/properties/id"
+}
+}
+"type":"object"
+}
+"xml":{1 item
+"name":"v4_bible.search"
+}
+}
+"v4_bible.one":{5 items
+"title":"v4_bible.one"
+"description":"The bible being returned"
+"type":"array"
+"items":{2 items
+"properties":{17 items
+"abbr":{1 item
+"$ref":"#/components/schemas/Bible/properties/id"
+}
+"alphabet":{1 item
+"$ref":"#/components/schemas/Alphabet/properties/script"
+}
+"mark":{1 item
+"$ref":"#/components/schemas/Bible/properties/copyright"
+}
+"name":{1 item
+"$ref":"#/components/schemas/BibleTranslation/properties/name"
+}
+"description":{1 item
+"$ref":"#/components/schemas/BibleTranslation/properties/description"
+}
+"vname":{1 item
+"$ref":"#/components/schemas/BibleTranslation/properties/name"
+}
+"vdescription":{1 item
+"$ref":"#/components/schemas/BibleTranslation/properties/description"
+}
+"publishers":{1 item
+"$ref":"#/components/schemas/Organization"
+}
+"providers":{1 item
+"$ref":"#/components/schemas/Organization"
+}
+"language":{1 item
+"$ref":"#/components/schemas/Language/properties/name"
+}
+"iso":{1 item
+"$ref":"#/components/schemas/Language/properties/iso"
+}
+"date":{1 item
+"$ref":"#/components/schemas/Bible/properties/date"
+}
+"country":{1 item
+"$ref":"#/components/schemas/Country/properties/name"
+}
+"books":{1 item
+"$ref":"#/components/schemas/Book/properties/id"
+}
+"links":{1 item
+"$ref":"#/components/schemas/BibleLink"
+}
+"filesets":{1 item
+"$ref":"#/components/schemas/BibleFileset"
+}
+"custom_font_required":{1 item
+"$ref":"#/components/schemas/Bible/properties/custom_font_required"
+}
+}
+"type":"object"
+}
+"xml":{1 item
+"name":"v4_bible.one"
+}
+}
+"v4_bible_verses.all":{5 items
+"title":"v4_bible_verses.all"
+"description":"The bibles being returned"
+"properties":{1 item
+"data":{3 items
+"properties":{1 item
+"meta":{1 item
+"$ref":"#/components/schemas/pagination"
+}
+}
+"type":"array"
+"items":{2 items
+"properties":{12 items
+"verse_start":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/verse_sequence"
+}
+"verse_end":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/verse_end"
+}
+"verse_sequence":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/verse_sequence"
+}
+"verse_start_alt":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/verse_start"
+}
+"chapter":{1 item
+"$ref":"#/components/schemas/BibleVerse/properties/chapter"
+}
+"book_id":{1 item
+"$ref":"#/components/schemas/BibleVerse/properties/book_id"
+}
+"language_id":{1 item
+"$ref":"#/components/schemas/Language/properties/id"
+}
+"bible_id":{1 item
+"$ref":"#/components/schemas/Bible/properties/id"
+}
+"verse_text":{1 item
+"$ref":"#/components/schemas/BibleVerse/properties/verse_text"
+}
+"fileset_id":{1 item
+"$ref":"#/components/schemas/Language/properties/iso"
+}
+"fileset_set_type_code":{1 item
+"$ref":"#/components/schemas/Bible/properties/date"
+}
+"bible_filesets":{1 item
+"$ref":"#/components/schemas/BibleFileset"
+}
+}
+"type":"object"
+}
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"v4_bible_verses.all"
+}
+}
+"v4_bible.books":{5 items
+"title":"v4_bible.books"
+"description":"The books of the bible with codes"
+"properties":{1 item
+"data":{2 items
+"type":"array"
+"items":{2 items
+"properties":{9 items
+"book_id":{1 item
+"$ref":"#/components/schemas/Book/properties/id"
+}
+"book_id_usfx":{1 item
+"$ref":"#/components/schemas/Book/properties/id_usfx"
+}
+"book_id_osis":{1 item
+"$ref":"#/components/schemas/Book/properties/id_osis"
+}
+"name":{1 item
+"$ref":"#/components/schemas/Book/properties/name"
+}
+"testament":{1 item
+"$ref":"#/components/schemas/Book/properties/book_testament"
+}
+"testament_order":{1 item
+"$ref":"#/components/schemas/Book/properties/testament_order"
+}
+"book_order":{1 item
+"$ref":"#/components/schemas/Book/properties/protestant_order"
+}
+"book_group":{1 item
+"$ref":"#/components/schemas/Book/properties/book_group"
+}
+"chapters":{1 item
+"$ref":"#/components/schemas/Book/properties/chapters"
+}
+}
+"type":"object"
+}
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"v4_bible.books"
+}
+}
+"v4_countries.one":{5 items
+"title":"v4_countries.one"
+"description":"The minimized country return for the all countries route"
+"properties":{1 item
+"data":{2 items
+"properties":{3 items
+"name":{1 item
+"$ref":"#/components/schemas/Country/properties/name"
+}
+"continent_code":{1 item
+"$ref":"#/components/schemas/Country/properties/continent"
+}
+"languages":{}0 items
+}
+"type":"object"
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"v4_countries.one"
+}
+}
+"v4_countries.all":{5 items
+"title":"v4_countries.all"
+"description":"The minimized country return for the all countries route"
+"properties":{1 item
+"data":{2 items
+"type":"array"
+"items":{2 items
+"properties":{3 items
+"name":{1 item
+"$ref":"#/components/schemas/Country/properties/name"
+}
+"continent_code":{1 item
+"$ref":"#/components/schemas/Country/properties/continent"
+}
+"languages":{}0 items
+}
+"type":"object"
+}
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"v4_countries.all"
+}
+}
+"v4_bible_filesets.show":{5 items
+"title":"v4_bible_filesets.show"
+"description":"The minimized alphabet return for the all alphabets route"
+"properties":{1 item
+"data":{2 items
+"type":"array"
+"items":{2 items
+"properties":{12 items
+"book_id":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/book_id"
+}
+"book_name":{1 item
+"$ref":"#/components/schemas/BookTranslation/properties/name"
+}
+"chapter_start":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/chapter_start"
+}
+"chapter_end":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/chapter_end"
+}
+"verse_start":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/verse_start"
+}
+"verse_start_alt":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/verse_start"
+}
+"verse_end":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/verse_end"
+}
+"verse_end_alt":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/verse_end"
+}
+"thumbnail":{3 items
+"description":"The image url"
+"type":"string"
+"maxLength":191
+}
+"timestamp":{1 item
+"$ref":"#/components/schemas/BibleFileTimestamp/properties/timestamp"
+}
+"path":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/file_name"
+}
+"duration":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/duration"
+}
+}
+"type":"object"
+}
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"v4_bible_filesets.show"
+}
+}
+"v2_text_verse":{5 items
+"title":"v2_text_verse"
+"description":"The bible Search Group Response"
+"type":"array"
+"items":{2 items
+"properties":{8 items
+"book_name":{1 item
+"$ref":"#/components/schemas/Book/properties/name"
+}
+"book_id":{1 item
+"$ref":"#/components/schemas/Book/properties/name"
+}
+"book_order":{1 item
+"$ref":"#/components/schemas/Book/properties/protestant_order"
+}
+"chapter_id":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/chapter_start"
+}
+"chapter_title":{2 items
+"type":"string"
+"example":"Chapter 1"
+}
+"verse_id":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/verse_start"
+}
+"verse_text":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/verse_text"
+}
+"paragraph_number":{2 items
+"type":"string"
+"example":"2"
+}
+}
+"type":"object"
+}
+"xml":{1 item
+"name":"v2_text_verse"
+}
+}
+"v4_bible_filesets_chapter":{5 items
+"title":"v4_bible_filesets_chapter"
+"description":"The bible chapter response"
+"properties":{1 item
+"data":{2 items
+"type":"array"
+"items":{2 items
+"properties":{10 items
+"book_id":{1 item
+"$ref":"#/components/schemas/Book/properties/id"
+}
+"book_name":{1 item
+"$ref":"#/components/schemas/Book/properties/name"
+}
+"book_name_alt":{1 item
+"$ref":"#/components/schemas/BookTranslation/properties/name"
+}
+"chapter":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/chapter_start"
+}
+"chapter_alt":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/chapter_start"
+}
+"verse_start":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/verse_sequence"
+}
+"verse_start_alt":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/verse_start"
+}
+"verse_end":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/verse_end"
+}
+"verse_end_alt":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/verse_end"
+}
+"verse_text":{1 item
+"type":"string"
+}
+}
+"type":"object"
+}
+}
+}
+"type":"object"
+"xml":{1 item
+"name":"v4_bible_filesets_chapter"
+}
+}
+"v4_note":{2 items
+"properties":{15 items
+"id":{1 item
+"$ref":"#/components/schemas/Note/properties/id"
+}
+"bible_id":{1 item
+"$ref":"#/components/schemas/Note/properties/bible_id"
+}
+"book_id":{1 item
+"$ref":"#/components/schemas/Note/properties/book_id"
+}
+"book_name":{1 item
+"$ref":"#/components/schemas/BibleBook/properties/name"
+}
+"chapter":{1 item
+"$ref":"#/components/schemas/Note/properties/chapter"
+}
+"verse_start":{1 item
+"$ref":"#/components/schemas/Note/properties/verse_start"
+}
+"verse_start_alt":{1 item
+"$ref":"#/components/schemas/Note/properties/verse_start"
+}
+"verse_end":{1 item
+"$ref":"#/components/schemas/Note/properties/verse_end"
+}
+"verse_end_alt":{1 item
+"$ref":"#/components/schemas/Note/properties/verse_end"
+}
+"verse_text":{1 item
+"$ref":"#/components/schemas/BibleFile/properties/verse_text"
+}
+"notes":{1 item
+"$ref":"#/components/schemas/Note/properties/notes"
+}
+"created_at":{1 item
+"$ref":"#/components/schemas/Note/properties/created_at"
+}
+"updated_at":{1 item
+"$ref":"#/components/schemas/Note/properties/updated_at"
+}
+"bible_name":{1 item
+"$ref":"#/components/schemas/Note/properties/bible_name"
+}
+"tags":{1 item
+"$ref":"#/components/schemas/AnnotationTag"
+}
+}
+"type":"object"
+}
+}
+"responses":{4 items
+"plan":{2 items
+"description":"Plan Object"
+"content":{1 item
+"application/json":{1 item
+"schema":{1 item
+"$ref":"#/components/schemas/v4_plan_detail"
+}
+}
+}
+}
+"playlist":{2 items
+"description":"Playlist Object"
+"content":{1 item
+"application/json":{1 item
+"schema":{1 item
+"$ref":"#/components/schemas/v4_playlist_detail"
+}
+}
+}
+}
+"v4_languages.one":{2 items
+"description":"The Full alphabet return for the single alphabet route"
+"content":{1 item
+"application/json":{1 item
+"schema":{1 item
+"$ref":"#/components/schemas/Language"
+}
+}
+}
+}
+"v4_languages.all":{2 items
+"description":"The minimized language return for the single language route"
+"content":{1 item
+"application/json":{1 item
+"schema":{1 item
+"$ref":"#/components/schemas/Language"
+}
+}
+}
+}
+}
+"parameters":{7 items
+"version_number":{5 items
+"name":"v"
+"in":"query"
+"description":"The Version Number"
+"required":true
+"schema":{3 items
+"type":"integer"
+"enum":[2 items
+0:4
+1:2
+]
+"example":4
+}
+}
+"key":{5 items
+"name":"key"
+"in":"query"
+"description":"The key granted to the API developer upon sign up"
+"required":true
+"schema":{2 items
+"type":"string"
+"example":"f4cdf23a-22c3-66c9-cc4f-05dc711b41c6"
+}
+}
+"limit":{4 items
+"name":"limit"
+"in":"query"
+"description":"The number of search results to return"
+"schema":{2 items
+"type":"integer"
+"default":25
+}
+}
+"page":{4 items
+"name":"page"
+"in":"query"
+"description":"The current page of the results"
+"schema":{2 items
+"type":"integer"
+"default":1
+}
+}
+"sort_by":{4 items
+"name":"sort_by"
+"in":"query"
+"description":"The field to sort by"
+"schema":{1 item
+"type":"string"
+}
+}
+"sort_dir":{4 items
+"name":"sort_dir"
+"in":"query"
+"description":"The direction to sort by"
+"schema":{2 items
+"type":"string"
+"enum":[2 items
+0:"asc"
+1:"desc"
+]
+}
+}
+"l10n":{4 items
+"name":"l10n"
+"in":"query"
+"description":"When set to a valid three letter language iso, the returning results will be localized in the language matching that iso. (If an applicable translation exists). For a complete list see the `iso` field in the `/languages` route"
+"schema":{1 item
+"$ref":"#/components/schemas/Language/properties/iso"
+}
+}
+}
+"requestBodies":{2 items
+"ProjectStore":{3 items
+"description":"Information supplied for project creation/update"
+"required":true
+"content":{1 item
+"application/json":{1 item
+"schema":{2 items
+"properties":{5 items
+"name":{1 item
+"$ref":"#/components/schemas/Project/properties/name"
+}
+"url_avatar":{1 item
+"$ref":"#/components/schemas/Project/properties/url_avatar"
+}
+"url_avatar_icon":{1 item
+"$ref":"#/components/schemas/Project/properties/url_avatar_icon"
+}
+"url_site":{1 item
+"$ref":"#/components/schemas/Project/properties/url_site"
+}
+"description":{1 item
+"$ref":"#/components/schemas/Project/properties/description"
+}
+}
+"type":"object"
+}
+}
+}
+}
+"PlaylistItems":{3 items
+"description":"Fields for Playlist item creation"
+"required":true
+"content":{1 item
+"application/json":{1 item
+"schema":{2 items
+"type":"array"
+"items":{2 items
+"properties":{6 items
+"fileset_id":{1 item
+"$ref":"#/components/schemas/PlaylistItems/properties/fileset_id"
+}
+"book_id":{1 item
+"$ref":"#/components/schemas/PlaylistItems/properties/book_id"
+}
+"chapter_start":{1 item
+"$ref":"#/components/schemas/PlaylistItems/properties/chapter_start"
+}
+"chapter_end":{1 item
+"$ref":"#/components/schemas/PlaylistItems/properties/chapter_end"
+}
+"verse_start":{1 item
+"$ref":"#/components/schemas/PlaylistItems/properties/verse_start"
+}
+"verse_end":{1 item
+"$ref":"#/components/schemas/PlaylistItems/properties/verse_end"
+}
+}
+"type":"object"
+}
+}
+}
+}
+}
+}
+"securitySchemes":{2 items
+"dbp_key":{4 items
+"type":"apiKey"
+"description":"The key granted to the API developer upon sign up"
+"name":"key"
+"in":"query"
+}
+"dbp_user_token":{4 items
+"type":"apiKey"
+"description":"The token granted to an authenticated end user upon login"
+"name":"api_token"
+"in":"query"
+}
+}
+}
+"security":[1 item
+0:{1 item
+"dbp_key":[]0 items
+}
+]
+"tags":[4 items
+0:{3 items
+"name":"Languages"
+"description":"v4 Routes for obtaining Languages Data"
+"externalDocs":{2 items
+"description":"For more info please refer to the Ethnologue Registration Authority"
+"url":"https://www.iso.org/iso-639-language-codes.html"
+}
+}
+1:{3 items
+"name":"Countries"
+"description":"v4 Routes for obtaining Countries Data"
+"externalDocs":{2 items
+"description":"For more info please refer to the Iso Registration Authority"
+"url":"https://www.iso.org/iso-3166-country-codes.html"
+}
+}
+2:{2 items
+"name":"Bibles"
+"description":"v4 Routes for obtaining Bibles Data"
+}
+3:{2 items
+"name":"Audio Timing"
+"description":"v4 Routes for obtaining Audio timing information. This data could be used to search audio bibles for a specific term, make karaoke verse & audio readings, or to jump to a specific location in an audio file."
+}
+]
+"externalDocs":{2 items
+"description":"find more info here"
+"url":"https://www.biblebrain.com"
+}
+}

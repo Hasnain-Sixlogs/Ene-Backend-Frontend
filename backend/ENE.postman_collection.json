@@ -1,0 +1,275 @@
+{
+	"info": {
+		"_postman_id": "406af857-e615-4cf5-9c28-cef3615575fb",
+		"name": "ENE",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "37761031",
+		"_collection_link": "https://winter-flare-221533.postman.co/workspace/My-Workspace~45061ae6-b0e4-4bef-8158-0dccbc9f8d2d/collection/37761031-406af857-e615-4cf5-9c28-cef3615575fb?action=share&source=collection_link&creator=37761031"
+	},
+	"item": [
+		{
+			"name": "Bible",
+			"item": [
+				{
+					"name": "Get Languages",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://4.dbt.io/api/languages?v=4&page=1&key=851b4b78-fcf6-47fc-89c7-4e8d11446e26",
+							"protocol": "https",
+							"host": [
+								"4",
+								"dbt",
+								"io"
+							],
+							"path": [
+								"api",
+								"languages"
+							],
+							"query": [
+								{
+									"key": "v",
+									"value": "4"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "key",
+									"value": "851b4b78-fcf6-47fc-89c7-4e8d11446e26"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Languages (with search)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://4.dbt.io/api/languages/search/:lang?v=4&page=1&key=851b4b78-fcf6-47fc-89c7-4e8d11446e26",
+							"protocol": "https",
+							"host": [
+								"4",
+								"dbt",
+								"io"
+							],
+							"path": [
+								"api",
+								"languages",
+								"search",
+								":lang"
+							],
+							"query": [
+								{
+									"key": "v",
+									"value": "4"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "key",
+									"value": "851b4b78-fcf6-47fc-89c7-4e8d11446e26"
+								},
+								{
+									"key": "limit",
+									"value": "",
+									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "lang",
+									"value": "urdu"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get Bibles",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://4.dbt.io/api/bibles?v=4&language_code=18446&key=851b4b78-fcf6-47fc-89c7-4e8d11446e26",
+							"protocol": "https",
+							"host": [
+								"4",
+								"dbt",
+								"io"
+							],
+							"path": [
+								"api",
+								"bibles"
+							],
+							"query": [
+								{
+									"key": "v",
+									"value": "4"
+								},
+								{
+									"key": "language_code",
+									"value": "18446"
+								},
+								{
+									"key": "key",
+									"value": "851b4b78-fcf6-47fc-89c7-4e8d11446e26"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Chapters for a Bible",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://4.dbt.io/api/bibles/:bibleId/book?v=4&key=851b4b78-fcf6-47fc-89c7-4e8d11446e26&verify_content=true",
+							"protocol": "https",
+							"host": [
+								"4",
+								"dbt",
+								"io"
+							],
+							"path": [
+								"api",
+								"bibles",
+								":bibleId",
+								"book"
+							],
+							"query": [
+								{
+									"key": "v",
+									"value": "4"
+								},
+								{
+									"key": "key",
+									"value": "851b4b78-fcf6-47fc-89c7-4e8d11446e26"
+								},
+								{
+									"key": "verify_content",
+									"value": "true"
+								}
+							],
+							"variable": [
+								{
+									"key": "bibleId",
+									"value": "URDWTC"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get PDF/Text Content",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://4.dbt.io/api/bibles/filesets/:filesetId/:bookId/:chapter?v=4&key=851b4b78-fcf6-47fc-89c7-4e8d11446e26",
+							"protocol": "https",
+							"host": [
+								"4",
+								"dbt",
+								"io"
+							],
+							"path": [
+								"api",
+								"bibles",
+								"filesets",
+								":filesetId",
+								":bookId",
+								":chapter"
+							],
+							"query": [
+								{
+									"key": "v",
+									"value": "4"
+								},
+								{
+									"key": "key",
+									"value": "851b4b78-fcf6-47fc-89c7-4e8d11446e26"
+								}
+							],
+							"variable": [
+								{
+									"key": "filesetId",
+									"value": "URDIRVN_ET"
+								},
+								{
+									"key": "bookId",
+									"value": "MAT"
+								},
+								{
+									"key": "chapter",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Audio/Video Content",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://4.dbt.io/api/bibles/filesets/:filesetId/:bookId/:chapter?v=4&key=851b4b78-fcf6-47fc-89c7-4e8d11446e26",
+							"protocol": "https",
+							"host": [
+								"4",
+								"dbt",
+								"io"
+							],
+							"path": [
+								"api",
+								"bibles",
+								"filesets",
+								":filesetId",
+								":bookId",
+								":chapter"
+							],
+							"query": [
+								{
+									"key": "v",
+									"value": "4"
+								},
+								{
+									"key": "key",
+									"value": "851b4b78-fcf6-47fc-89c7-4e8d11446e26"
+								}
+							],
+							"variable": [
+								{
+									"key": "filesetId",
+									"value": "ENGESHN1DA"
+								},
+								{
+									"key": "bookId",
+									"value": "LUK"
+								},
+								{
+									"key": "chapter",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
