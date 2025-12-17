@@ -114,7 +114,7 @@ try {
   console.error('Error stack:', error.stack);
   // Create a dummy router so server can start
   const dummyRouter = express.Router();
-  dummyRouter.get('*', (req, res) => {
+  dummyRouter.get('/*', (req, res) => {
     res.status(503).json({ error: 'Routes not loaded', message: error.message });
   });
   app.use('/api/v2', dummyRouter);
