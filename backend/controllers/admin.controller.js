@@ -3,7 +3,7 @@ const Church = require("../models/church.model");
 const Event = require("../models/event.model");
 const Notes = require("../models/note.model");
 const FollowUpRequest = require("../models/followUpRequest.model");
-const PrayerRequest = require("../models/PrayerRequest.model");
+const PrayerRequest = require("../models/prayerRequest.model");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const {

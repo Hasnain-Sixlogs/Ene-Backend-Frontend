@@ -1,4 +1,4 @@
-const PrayerRequest = require("../models/PrayerRequest.model");
+const PrayerRequest = require("../models/prayerRequest.model");
 
 const createPrayerRequest = async (req, res) => {
   try {

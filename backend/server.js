@@ -113,11 +113,10 @@ try {
   console.error('Error loading routes:', error);
   console.error('Error stack:', error.stack);
   // Create a dummy router so server can start
-  const dummyRouter = express.Router();
-  dummyRouter.get('/*', (req, res) => {
+  // Express 5 doesn't support wildcard routes, use all() method instead
+  app.use('/api/v2', (req, res, next) => {
     res.status(503).json({ error: 'Routes not loaded', message: error.message });
   });
-  app.use('/api/v2', dummyRouter);
   console.log('Using dummy routes - server will start but API will not work');
 }
 
