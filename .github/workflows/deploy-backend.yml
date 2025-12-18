@@ -76,7 +76,7 @@ jobs:
             --timeout 300 \
             --max-instances 10 \
             --min-instances 0 \
-            --vpc-connector ene-vpc-connector \
+            --vpc-connector cloudrun-connector \
             --vpc-egress all-traffic \
             --set-env-vars "NODE_ENV=production,MONGODB_URI=${{ secrets.MONGODB_URI }},JWT_SECRET=${{ secrets.JWT_SECRET }},CORS_ORIGIN=${{ secrets.CORS_ORIGIN }},ImageUploadOnGCS=1,GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }},GCS_BUCKET_NAME=${{ secrets.GCS_BUCKET_NAME }},BASE_URL=${{ secrets.BACKEND_URL }},MAX_FILE_SIZE=10485760" \
             --update-secrets=/app/config/gcp-service-account.json=gcp-service-account-key:latest \
