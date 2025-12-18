@@ -38,6 +38,9 @@ RUN echo "=== Final verification - Files in config directory ===" && \
 # Create uploads directory
 RUN mkdir -p uploads
 
+# Create secrets directory for Cloud Run secret mounts
+RUN mkdir -p /app/secrets
+
 # Ensure config directory has correct permissions
 RUN chmod -R 755 config/
 

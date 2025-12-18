@@ -65,6 +65,7 @@ jobs:
 
       - name: Deploy to Cloud Run
         run: |
+          # First, remove the old secret mount if it exists, then add the new one
           gcloud run deploy ${{ env.SERVICE_NAME }} \
             --image ${{ env.ARTIFACT_REGISTRY }}/${{ env.SERVICE_NAME }}:${{ github.sha }} \
             --region ${{ env.REGION }} \
@@ -79,5 +80,6 @@ jobs:
             --vpc-connector cloudrun-connector \
             --vpc-egress all-traffic \
             --set-env-vars "NODE_ENV=production,MONGODB_URI=${{ secrets.MONGODB_URI }},JWT_SECRET=${{ secrets.JWT_SECRET }},CORS_ORIGIN=${{ secrets.CORS_ORIGIN }},ImageUploadOnGCS=1,GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }},GCS_BUCKET_NAME=${{ secrets.GCS_BUCKET_NAME }},BASE_URL=${{ secrets.BACKEND_URL }},MAX_FILE_SIZE=10485760,GCP_SERVICE_ACCOUNT_KEY=/app/secrets/gcp-service-account.json" \
+            --remove-secrets=/app/config/gcp-service-account.json \
             --update-secrets=/app/secrets/gcp-service-account.json=gcp-service-account-key:latest \
             --service-account ${{ secrets.GCP_SA_EMAIL }}
