@@ -149,7 +149,7 @@ export default function UserChat() {
       setIsLoadingMessages(true);
       const response = await getMessages(userId, { page: 1, limit: 100 });
       if (response.success) {
-        setMessages(response.data.messages.reverse()); // Reverse to show oldest first
+        setMessages(response.data.messages); // Reverse to show oldest first
         // Mark messages as read
         await markMessagesAsRead(userId);
         // Also mark via socket

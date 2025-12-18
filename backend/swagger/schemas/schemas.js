@@ -372,6 +372,86 @@ module.exports = {
       }
     }
   },
+  UpdateProfileRequest: {
+    type: 'object',
+    properties: {
+      name: {
+        type: 'string',
+        example: 'John Doe'
+      },
+      email: {
+        type: 'string',
+        format: 'email',
+        nullable: true,
+        example: 'john.doe@example.com'
+      },
+      mobile: {
+        type: 'string',
+        example: '1234567890'
+      },
+      country_code: {
+        type: 'string',
+        example: '+1'
+      },
+      profile: {
+        type: 'string',
+        nullable: true,
+        example: 'https://example.com/profile.jpg'
+      },
+      address: {
+        type: 'string',
+        nullable: true,
+        example: '123 Main St'
+      },
+      city: {
+        type: 'string',
+        nullable: true,
+        example: 'New York'
+      },
+      lat: {
+        type: 'number',
+        nullable: true,
+        example: 40.7128
+      },
+      lng: {
+        type: 'number',
+        nullable: true,
+        example: -74.006
+      },
+      gender: {
+        type: 'string',
+        enum: ['male', 'female', 'other'],
+        nullable: true,
+        example: 'male'
+      },
+      date_of_birth: {
+        type: 'string',
+        format: 'date',
+        nullable: true,
+        example: '1990-01-01'
+      },
+      device_type: {
+        type: 'string',
+        enum: ['android', 'ios', 'Android', 'iOS'],
+        nullable: true,
+        example: 'android'
+      },
+      device_token: {
+        type: 'string',
+        nullable: true,
+        example: 'device-token-123'
+      },
+      fcm_token: {
+        type: 'string',
+        nullable: true,
+        example: 'fcm-token-123'
+      },
+      app_language: {
+        type: 'string',
+        example: 'en'
+      }
+    }
+  },
   AuthResponse: {
     type: 'object',
     properties: {

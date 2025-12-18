@@ -21,5 +21,7 @@ router.put('/set-language', authenticate, authController.setLanguage);
 
 router.put('/accept-lord', authenticate, authController.acceptLord);
 
+router.put('/update-profile', authenticate, authController.updateProfile);
+
 module.exports = router;
 

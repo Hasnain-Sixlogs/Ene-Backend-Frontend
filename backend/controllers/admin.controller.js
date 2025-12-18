@@ -801,6 +801,30 @@ const updateUser = async (req, res) => {
     delete updateData.role;
     delete updateData._id;
     delete updateData.deleted_at;
+    delete updateData.email;
+    delete updateData.mobile;
+    delete updateData.country_code;
+
+    // Handle location update - ensure proper GeoJSON format
+    if (updateData.location) {
+      // Get existing user to preserve coordinates if not provided
+      const existingUser = await User.findById(id).select("location");
+      const existingLocation = existingUser?.location?.toObject() || {};
+      
+      const { address, city, lat, lng, coordinates } = updateData.location;
+      
+      // Build location object with proper GeoJSON format
+      const locationUpdate = {
+        address: address !== undefined ? address : (existingLocation.address || null),
+        city: city !== undefined ? city : (existingLocation.city || null),
+        type: "Point",
+        coordinates: coordinates || 
+          (lng !== undefined && lat !== undefined ? [Number(lng), Number(lat)] : 
+          (existingLocation.coordinates || [0, 0]))
+      };
+      
+      updateData.location = locationUpdate;
+    }
 
     const user = await User.findOneAndUpdate(
       {

@@ -701,6 +701,72 @@ const acceptLord = async (req, res) => {
   }
 };
 
+const updateProfile = async (req, res) => {
+  try {
+    const { ...rest } = req.body;
+    const userId = req.user?.id || req.user?._id;
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+    
+    // Don't allow updating sensitive fields
+    delete rest.password;
+    delete rest.role;
+    delete rest._id;
+    delete rest.deleted_at;
+    delete rest.email;
+    delete rest.mobile;
+    delete rest.country_code;
+    
+    // Handle location update - ensure proper GeoJSON format
+    if (rest.location) {
+      const existingUser = await User.findById(userId).select("location");
+      const existingLocation = existingUser?.location?.toObject() || {};
+      
+      const { address, city, lat, lng, coordinates } = rest.location;
+      
+      // Build location object with proper GeoJSON format
+      rest.location = {
+        address: address !== undefined ? address : (existingLocation.address || null),
+        city: city !== undefined ? city : (existingLocation.city || null),
+        type: "Point",
+        coordinates: coordinates || 
+          (lng !== undefined && lat !== undefined ? [Number(lng), Number(lat)] : 
+          (existingLocation.coordinates || [0, 0]))
+      };
+    }
+    
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+    const updatedUser = await User.findByIdAndUpdate(userId, rest, { new: true, runValidators: true });
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+    res.json({
+      success: true,
+      message: "Profile updated successfully",
+      data: updatedUser,
+    });
+  } catch (error) {
+    console.error("Update profile error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error updating profile",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
+  }
+};
 module.exports = {
   signup,
   signin,
@@ -710,5 +776,6 @@ module.exports = {
   forgotPassword,
   resetPassword,
   setLanguage,
-  acceptLord
+  acceptLord,
+  updateProfile,
 };
