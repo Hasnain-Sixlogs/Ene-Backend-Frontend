@@ -130,12 +130,6 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
-// In your Express app
-app.get("/my-ip", async (req, res) => {
-  const fetch = require("node-fetch");
-  const ip = await fetch("https://ifconfig.me").then(r => r.text());
-  res.send(`Cloud Run sees IP: ${ip}`);
-});
 
 // Error handling middleware
 app.use((err, req, res, next) => {
