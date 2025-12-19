@@ -418,7 +418,7 @@ const getDashboardStats = async (req, res) => {
           'User-Agent': 'Ene-Backend/1.0',
           'Accept': 'application/json',
         },
-        timeout: 10000, // 10 second timeout
+        timeout: 15000, // node-fetch supports timeout option
       });
       
       if (response.ok) {
