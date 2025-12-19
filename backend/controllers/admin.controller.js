@@ -13,7 +13,6 @@ const {
   verifyrefresh_token,
 } = require("../utils/jwt");
 const crypto = require("crypto");
-const fetch = require("node-fetch");
 
 /**
  * Admin login with email only
@@ -409,83 +408,24 @@ const getDashboardStats = async (req, res) => {
     const totalPrayers = await PrayerRequest.countDocuments();
 
     // Get total bibles from DBT API
-    // Strategy: Try DBT API with longer timeout, but only wait 2 seconds max
-    // If DBT API responds quickly, use it; otherwise use fallback
     let totalBibles = 0;
-    
-    // Get fallback count first
-    const bibleIds = await Notes.distinct("bible_id");
-    totalBibles = bibleIds.length;
-    console.log(`[DBT API] Fallback count from notes: ${totalBibles}`);
-    
-    // Try DBT API with longer timeout (15s), but only wait 2 seconds for response
-    const dbtApiPromise = (async () => {
-      const startTime = Date.now();
-      try {
-        const dbtApiUrl = "https://4.dbt.io/api/bibles?v=4&key=851b4b78-fcf6-47fc-89c7-4e8d11446e26";
-        console.log(`[DBT API] Attempting to fetch from: ${dbtApiUrl}`);
-        
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => {
-          console.log(`[DBT API] Request timeout after 15 seconds`);
-          controller.abort();
-        }, 15000); // Longer timeout for slow networks
-        
-        const response = await fetch(dbtApiUrl, {
-          headers: {
-            'User-Agent': 'Ene-Backend/1.0',
-            'Accept': 'application/json',
-          },
-          signal: controller.signal,
-        });
-        
-        clearTimeout(timeoutId);
-        const elapsed = Date.now() - startTime;
-        console.log(`[DBT API] Response received in ${elapsed}ms, status: ${response.status}`);
-        
-        if (response.ok) {
-          const data = await response.json();
-          const count = data.meta?.pagination?.total || 0;
-          console.log(`[DBT API] Success! Total bibles: ${count}`);
-          return count;
-        } else {
-          console.error(`[DBT API] HTTP error: ${response.status} ${response.statusText}`);
-        }
-      } catch (error) {
-        const elapsed = Date.now() - startTime;
-        if (error.name === 'AbortError') {
-          console.error(`[DBT API] Request aborted after ${elapsed}ms (timeout)`);
-        } else {
-          console.error(`[DBT API] Error after ${elapsed}ms:`, error.message);
-        }
-      }
-      return null;
-    })();
-    
-    // Wait for DBT API response - longer timeout on Cloud Run (production)
-    // Locally it takes ~2 seconds, so 3 seconds is enough
-    // On Cloud Run it takes 10+ seconds, so we need 15 seconds there
-    const isProduction = process.env.NODE_ENV === 'production';
-    const waitTime = isProduction ? 15000 : 3000; // 15s on Cloud Run, 3s locally
-    
     try {
-      const dbtCount = await Promise.race([
-        dbtApiPromise,
-        new Promise(resolve => setTimeout(() => {
-          console.log(`[DBT API] Timeout after ${waitTime/1000} seconds - using fallback`);
-          resolve(null);
-        }, waitTime))
-      ]);
-      
-      if (dbtCount !== null && dbtCount > 0) {
-        console.log(`[DBT API] Using DBT API count: ${dbtCount}`);
-        totalBibles = dbtCount;
+      const dbtApiUrl = "https://4.dbt.io/api/bibles?v=4&key=851b4b78-fcf6-47fc-89c7-4e8d11446e26";
+      const response = await fetch(dbtApiUrl);
+      if (response.ok) {
+        const data = await response.json();
+        totalBibles = data.meta?.pagination?.total || 0;
       } else {
-        console.log(`[DBT API] Using fallback count: ${totalBibles}`);
+        console.error("DBT API error:", response.status, response.statusText);
+        // Fallback to counting unique bible_id from notes
+        const bibleIds = await Notes.distinct("bible_id");
+        totalBibles = bibleIds.length;
       }
     } catch (error) {
-      console.error(`[DBT API] Promise.race error:`, error.message);
-      // Already using fallback, ignore
+      console.error("Error fetching bibles from DBT API:", error.message);
+      // Fallback to counting unique bible_id from notes
+      const bibleIds = await Notes.distinct("bible_id");
+      totalBibles = bibleIds.length;
     }
 
     // Get total events
@@ -887,9 +827,9 @@ const updateUser = async (req, res) => {
       // Get existing user to preserve coordinates if not provided
       const existingUser = await User.findById(id).select("location");
       const existingLocation = existingUser?.location?.toObject() || {};
-      
+
       const { address, city, lat, lng, coordinates } = updateData.location;
-      
+
       // Build location object with proper GeoJSON format
       const locationUpdate = {
         address: address !== undefined ? address : (existingLocation.address || null),
@@ -899,7 +839,7 @@ const updateUser = async (req, res) => {
           (lng !== undefined && lat !== undefined ? [Number(lng), Number(lat)] : 
           (existingLocation.coordinates || [0, 0]))
       };
-      
+
       updateData.location = locationUpdate;
     }
 
