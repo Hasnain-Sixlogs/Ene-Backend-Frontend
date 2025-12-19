@@ -131,60 +131,6 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Test DBT API connectivity (for debugging)
-app.get('/test-dbt-api', async (req, res) => {
-  const fetch = require("node-fetch");
-  const dbtApiUrl = "https://4.dbt.io/api/bibles?v=4&key=851b4b78-fcf6-47fc-89c7-4e8d11446e26";
-  const startTime = Date.now();
-  
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout for test
-    
-    const response = await fetch(dbtApiUrl, {
-      headers: {
-        'User-Agent': 'Ene-Backend/1.0',
-        'Accept': 'application/json',
-      },
-      signal: controller.signal,
-    });
-    
-    clearTimeout(timeoutId);
-    const elapsed = Date.now() - startTime;
-    
-    if (response.ok) {
-      const data = await response.json();
-      res.json({
-        success: true,
-        message: 'DBT API is reachable',
-        elapsed: `${elapsed}ms`,
-        status: response.status,
-        totalBibles: data.meta?.pagination?.total || 0,
-        environment: process.env.NODE_ENV || 'unknown'
-      });
-    } else {
-      res.json({
-        success: false,
-        message: 'DBT API returned error',
-        elapsed: `${elapsed}ms`,
-        status: response.status,
-        statusText: response.statusText,
-        environment: process.env.NODE_ENV || 'unknown'
-      });
-    }
-  } catch (error) {
-    const elapsed = Date.now() - startTime;
-    res.json({
-      success: false,
-      message: 'DBT API request failed',
-      elapsed: `${elapsed}ms`,
-      error: error.message,
-      errorName: error.name,
-      environment: process.env.NODE_ENV || 'unknown'
-    });
-  }
-});
-
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
