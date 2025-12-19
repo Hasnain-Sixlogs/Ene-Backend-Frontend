@@ -20,21 +20,21 @@ const signup = async (req, res) => {
       name,
       email,
       mobile,
-      countryCode,
+      country_code,
       password,
       confirmPassword,
       address,
       city,
       lat,
       lng,
-      deviceType,
-      deviceToken,
-      fcmToken,
-      appLanguage = "en",
+      device_type,
+      device_token,
+      fcm_token,
+      app_language = "en",
     } = req.body;
 
     // Validation
-    if (!name || !mobile || !countryCode || !password || !confirmPassword) {
+    if (!name || !mobile || !country_code || !password || !confirmPassword) {
       return res.status(400).json({
         success: false,
         message: "Please provide all required fields",
@@ -83,14 +83,14 @@ const signup = async (req, res) => {
 
     // Generate OTP
     const otp = generateOTP();
-    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    const otp_expiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
     // Create user
     const user = new User({
       name,
       email: email || null,
       mobile: mobile,
-      country_code: countryCode,
+      country_code: country_code,
       password, // Will be hashed by pre-save hook
       location: {
         address: address || null,
@@ -99,11 +99,11 @@ const signup = async (req, res) => {
         coordinates: [lng || 0, lat || 0],
       },
       otp,
-      otp_expiry: otpExpiry,
-      device_type: deviceType || null,
-      device_token: deviceToken || null,
-      fcm_token: fcmToken || null,
-      app_language: appLanguage,
+      otp_expiry: otp_expiry,
+      device_type: device_type || null,
+      device_token: device_token || null,
+      fcm_token: fcm_token || null,
+      app_language: app_language,
     });
 
     await user.save();
@@ -141,9 +141,9 @@ const signin = async (req, res) => {
       emailOrMobile,
       password,
       rememberMe = false,
-      deviceType,
-      deviceToken,
-      fcmToken,
+      device_type,
+      device_token,
+      fcm_token,
     } = req.body;
 
     // Validation
@@ -177,10 +177,10 @@ const signin = async (req, res) => {
     }
 
     // Update device info if provided
-    if (deviceType || deviceToken || fcmToken) {
-      if (deviceType) user.device_type = deviceType;
-      if (deviceToken) user.device_token = deviceToken;
-      if (fcmToken) user.fcm_token = fcmToken;
+    if (device_type || device_token || fcm_token) {
+      if (device_type) user.device_type = device_type;
+      if (device_token) user.device_token = device_token;
+      if (fcm_token) user.fcm_token = fcm_token;
       await user.save();
     }
 
@@ -318,11 +318,11 @@ const resendOTP = async (req, res) => {
 
     // Generate new OTP
     const otp = generateOTP();
-    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    const otp_expiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
     // Update user OTP
     user.otp = otp;
-    user.otp_expiry = otpExpiry;
+    user.otp_expiry = otp_expiry;
     await user.save();
 
     // Send OTP
@@ -348,27 +348,27 @@ const resendOTP = async (req, res) => {
 const socialLogin = async (req, res) => {
   try {
     const {
-      socialType,
-      socialToken,
+      social_type,
+      social_token,
       name,
       email,
       mobile,
-      countryCode,
-      deviceType,
-      deviceToken,
-      fcmToken,
-      appLanguage = "en",
+      country_code,
+      device_type,
+      device_token,
+      fcm_token,
+      app_language = "en",
     } = req.body;
 
     // Validation
-    if (!socialType || !socialToken) {
+    if (!social_type || !social_token) {
       return res.status(400).json({
         success: false,
         message: "Please provide social type and token",
       });
     }
 
-    if (!["google", "apple"].includes(socialType)) {
+    if (!["google", "apple"].includes(social_type)) {
       return res.status(400).json({
         success: false,
         message: "Invalid social type. Supported types: google, apple",
@@ -384,7 +384,7 @@ const socialLogin = async (req, res) => {
       $or: [
         { email: email },
         { mobile: mobile },
-        { social_token: socialToken, social_type: socialType },
+        { social_token: social_token, social_type: social_type },
       ],
       deleted_at: null,
     });
@@ -392,8 +392,8 @@ const socialLogin = async (req, res) => {
     if (user) {
       // Update social login info if not set
       if (!user.social_token || !user.social_type) {
-        user.social_token = socialToken;
-        user.social_type = socialType;
+        user.social_token = social_token;
+        user.social_type = social_type;
         await user.save();
       }
     } else {
@@ -409,22 +409,22 @@ const socialLogin = async (req, res) => {
         name,
         email,
         mobile: mobile || null,
-        country_code: countryCode || "+1",
+        country_code: country_code || "+1",
         password: Math.random().toString(36).slice(-12), // Random password for social login
-        social_token: socialToken,
-        social_type: socialType,
-        device_type: deviceType || null,
-        device_token: deviceToken || null,
-        fcm_token: fcmToken || null,
-        app_language: appLanguage,
+        social_token: social_token,
+        social_type: social_type,
+        device_type: device_type || null,
+        device_token: device_token || null,
+        fcm_token: fcm_token || null,
+        app_language: app_language,
       });
 
       // If phone number provided, generate OTP
       if (mobile) {
         const otp = generateOTP();
-        const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
+        const otp_expiry = new Date(Date.now() + 10 * 60 * 1000);
         user.otp = otp;
-        user.otp_expiry = otpExpiry;
+        user.otp_expiry = otp_expiry;
         await sendOTP(mobile, otp);
       }
 
@@ -432,10 +432,10 @@ const socialLogin = async (req, res) => {
     }
 
     // Update device info
-    if (deviceType || deviceToken || fcmToken) {
-      if (deviceType) user.device_type = deviceType;
-      if (deviceToken) user.device_token = deviceToken;
-      if (fcmToken) user.fcm_token = fcmToken;
+    if (device_type || device_token || fcm_token) {
+      if (device_type) user.device_type = device_type;
+      if (device_token) user.device_token = device_token;
+      if (fcm_token) user.fcm_token = fcm_token;
       await user.save();
     }
 
@@ -504,10 +504,10 @@ const forgotPassword = async (req, res) => {
 
     // Generate OTP for password reset
     const otp = generateOTP();
-    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    const otp_expiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
     user.otp = otp;
-    user.otp_expiry = otpExpiry;
+    user.otp_expiry = otp_expiry;
     await user.save();
 
     // Send OTP via SMS or Email

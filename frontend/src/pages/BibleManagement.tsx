@@ -1,5 +1,5 @@
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { Search, Download, RotateCcw, Eye, Book, Loader2, Globe, ChevronRight } from "lucide-react";
+import { Search, Download, RotateCcw, Eye, Book as BookIcon, Loader2, Globe, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
@@ -20,7 +20,7 @@ export default function BibleManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [bibles, setBibles] = useState<Bible[]>([]);
   const [languages, setLanguages] = useState<Language[]>([]);
-  const [selectedLanguage, setSelectedLanguage] = useState<string>("urd");
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("eng");
   const [languageSearchTerm, setLanguageSearchTerm] = useState("");
   const [isLoadingBibles, setIsLoadingBibles] = useState(false);
   const [isLoadingLanguages, setIsLoadingLanguages] = useState(false);
@@ -118,11 +118,36 @@ export default function BibleManagement() {
     navigate(`/bible-chapter?bibleId=${selectedBible.abbr}&bookId=${book.book_id}&chapter=${chapter}&lang=${selectedLanguage}`);
   };
 
-  const filteredVersions = bibles.filter(version =>
-    version.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    version.abbr.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    version.language.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredVersions = bibles.filter(version => {
+    if (!searchTerm.trim()) return true;
+    
+    const searchLower = searchTerm.toLowerCase();
+    const name = (version.name || "").toLowerCase();
+    const abbr = ((version.abbr || version.abbreviation) || "").toLowerCase();
+    const vname = (version.vname || "").toLowerCase();
+    const autonym = (version.autonym || "").toLowerCase();
+    const iso = (version.iso || "").toLowerCase();
+    const date = (version.date || "").toLowerCase();
+    
+    // Handle language as both string and object
+    let languageName = "";
+    const language = version.language as { name?: string } | string | undefined;
+    if (typeof language === "string") {
+      languageName = language.toLowerCase();
+    } else if (language && typeof language === "object" && "name" in language) {
+      languageName = (language.name || "").toLowerCase();
+    }
+    
+    return (
+      name.includes(searchLower) ||
+      abbr.includes(searchLower) ||
+      vname.includes(searchLower) ||
+      autonym.includes(searchLower) ||
+      languageName.includes(searchLower) ||
+      iso.includes(searchLower) ||
+      date.includes(searchLower)
+    );
+  });
 
   // Calculate total chapters for a bible
   const getTotalChapters = (books: Book[]): number => {
@@ -244,7 +269,7 @@ export default function BibleManagement() {
             </div>
           ) : filteredVersions.length === 0 ? (
             <div className="text-center py-12">
-              <Book className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+              <BookIcon className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
               <p className="text-muted-foreground">
                 {bibles.length === 0 
                   ? "Select a language and fetch bibles to get started"
@@ -275,8 +300,14 @@ export default function BibleManagement() {
                         <td className="p-4 text-muted-foreground font-mono">{version.abbr}</td>
                         <td className="p-4 text-muted-foreground">
                           <div>
-                            <div>{version.language}</div>
-                            <div className="text-xs text-muted-foreground">{version.autonym}</div>
+                            <div>
+                              {typeof version.language === "string" 
+                                ? version.language 
+                                : version.language?.name || "N/A"}
+                            </div>
+                            {version.autonym && (
+                              <div className="text-xs text-muted-foreground">{version.autonym}</div>
+                            )}
                           </div>
                         </td>
                         <td className="p-4 text-muted-foreground">{version.date || "N/A"}</td>
@@ -307,7 +338,7 @@ export default function BibleManagement() {
           <DialogContent className="sm:max-w-[900px] max-h-[85vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <Book className="w-5 h-5 text-accent" />
+                <BookIcon className="w-5 h-5 text-accent" />
                 {selectedBible?.name} - Books & Chapters
               </DialogTitle>
             </DialogHeader>

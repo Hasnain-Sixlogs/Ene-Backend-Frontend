@@ -6,8 +6,8 @@ import type {
   LoginRequest, 
   LoginResponse, 
   ApiError,
-  RefreshTokenRequest,
-  RefreshTokenResponse,
+  refresh_tokenRequest,
+  refresh_tokenResponse,
   MeResponse,
   ForgotPasswordRequest,
   ResetPasswordRequest,
@@ -72,7 +72,7 @@ const setSession = (session: Session | null): void => {
 };
 
 // Get refresh token
-export const getRefreshToken = (): string | null => {
+export const getrefresh_token = (): string | null => {
   return localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
 };
 
@@ -119,13 +119,13 @@ export const authenticatedFetch = async (
 // Refresh access token using refresh token
 export const refreshAccessToken = async (): Promise<{ accessToken: string | null; error: Error | null }> => {
   try {
-    const refreshToken = getRefreshToken();
-    if (!refreshToken) {
+    const refresh_token = getrefresh_token();
+    if (!refresh_token) {
       return { accessToken: null, error: new Error('No refresh token found') };
     }
 
-    const request: RefreshTokenRequest = {
-      refreshToken,
+    const request: refresh_tokenRequest = {
+      refresh_token,
     };
 
     const response = await fetch(getApiUrl(API_ENDPOINTS.AUTH.REFRESH), {
@@ -150,7 +150,7 @@ export const refreshAccessToken = async (): Promise<{ accessToken: string | null
       return { accessToken: null, error: new Error(errorMessage) };
     }
 
-    const refreshResponse = data as RefreshTokenResponse;
+    const refreshResponse = data as refresh_tokenResponse;
     const newAccessToken = refreshResponse.data.accessToken;
 
     // Update session with new access token
@@ -218,7 +218,7 @@ export const signIn = async (email: string, password: string): Promise<{ error: 
         created_at: admin.createdAt,
       },
       access_token: loginResponse.data.accessToken,
-      refresh_token: loginResponse.data.refreshToken,
+      refresh_token: loginResponse.data.refresh_token,
       expires_at: expiresAt,
     };
 

@@ -228,9 +228,9 @@ export interface ApiResponse<T> {
   };
 }
 
-export interface BiblesResponse extends ApiResponse<Bible[]> {}
-export interface LanguagesResponse extends ApiResponse<Language[]> {}
-export interface BooksResponse extends ApiResponse<Book[]> {}
-export interface ContentResponse extends ApiResponse<BibleContent> {}
-export interface ChapterContentResponse extends ApiResponse<ChapterContent> {}
+export type BiblesResponse = ApiResponse<Bible[]>;
+export type LanguagesResponse = ApiResponse<Language[]>;
+export type BooksResponse = ApiResponse<Book[]>;
+export type ContentResponse = ApiResponse<BibleContent>;
+export type ChapterContentResponse = ApiResponse<ChapterContent>;
 

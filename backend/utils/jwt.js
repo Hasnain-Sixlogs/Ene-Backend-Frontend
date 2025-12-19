@@ -8,7 +8,7 @@ const generateToken = (id) => {
 };
 
 // Generate refresh token (long-lived)
-const generateRefreshToken = (id) => {
+const generaterefresh_token = (id) => {
   return jwt.sign({ id }, process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_REFRESH_EXPIRE || '7d'
   });
@@ -24,7 +24,7 @@ const verifyToken = (token) => {
 };
 
 // Verify refresh token
-const verifyRefreshToken = (token) => {
+const verifyrefresh_token = (token) => {
   try {
     return jwt.verify(token, process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET);
   } catch (error) {
@@ -34,7 +34,7 @@ const verifyRefreshToken = (token) => {
 
 module.exports = {
   generateToken,
-  generateRefreshToken,
+  generaterefresh_token,
   verifyToken,
-  verifyRefreshToken
+  verifyrefresh_token
 };

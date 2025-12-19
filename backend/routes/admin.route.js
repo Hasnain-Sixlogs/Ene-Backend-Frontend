@@ -6,7 +6,7 @@ const { authenticateAdmin } = require('../middlewares/admin.middleware');
 // Admin authentication routes
 router.post('/signin', adminController.adminSignin);
 router.post('/logout', authenticateAdmin, adminController.adminLogout);
-router.post('/refresh', adminController.refreshToken);
+router.post('/refresh', adminController.refresh_token);
 router.get('/me', authenticateAdmin, adminController.getAdminMe);
 router.post('/forgot-password', adminController.forgotPassword);
 router.post('/reset-password', adminController.resetPassword);

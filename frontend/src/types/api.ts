@@ -18,7 +18,7 @@ export interface Admin {
 export interface LoginResponseData {
   admin: Admin;
   accessToken: string;
-  refreshToken: string;
+  refresh_token: string;
 }
 
 export interface LoginResponse {
@@ -27,11 +27,11 @@ export interface LoginResponse {
   data: LoginResponseData;
 }
 
-export interface RefreshTokenRequest {
-  refreshToken: string;
+export interface refresh_tokenRequest {
+  refresh_token: string;
 }
 
-export interface RefreshTokenResponse {
+export interface refresh_tokenResponse {
   success: boolean;
   message: string;
   data: {

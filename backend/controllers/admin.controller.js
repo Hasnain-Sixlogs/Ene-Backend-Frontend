@@ -8,9 +8,9 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const {
   generateToken,
-  generateRefreshToken,
+  generaterefresh_token,
   verifyToken,
-  verifyRefreshToken,
+  verifyrefresh_token,
 } = require("../utils/jwt");
 const crypto = require("crypto");
 
@@ -61,10 +61,10 @@ const adminSignin = async (req, res) => {
     );
 
     // Generate refresh token (long-lived: 7 days)
-    const refreshToken = generateRefreshToken(admin._id);
+    const refresh_token = generaterefresh_token(admin._id);
 
     // Store refresh token in user document
-    admin.refresh_token = refreshToken;
+    admin.refresh_token = refresh_token;
     await admin.save();
 
     // Return admin data (without password and sensitive info)
@@ -79,7 +79,7 @@ const adminSignin = async (req, res) => {
       data: {
         admin: adminObj,
         accessToken,
-        refreshToken,
+        refresh_token,
       },
     });
   } catch (error) {
@@ -132,11 +132,11 @@ const adminLogout = async (req, res) => {
  * Refresh access token
  * POST /api/v2/auth/refresh
  */
-const refreshToken = async (req, res) => {
+const refresh_token = async (req, res) => {
   try {
-    const { refreshToken } = req.body;
+    const { refresh_token } = req.body;
 
-    if (!refreshToken) {
+    if (!refresh_token) {
       return res.status(400).json({
         success: false,
         message: "Please provide refresh token",
@@ -144,7 +144,7 @@ const refreshToken = async (req, res) => {
     }
 
     // Verify refresh token
-    const decoded = verifyRefreshToken(refreshToken);
+    const decoded = verifyrefresh_token(refresh_token);
     if (!decoded) {
       return res.status(401).json({
         success: false,
@@ -156,7 +156,7 @@ const refreshToken = async (req, res) => {
     const admin = await User.findOne({
       _id: decoded.id,
       role: "admin",
-      refresh_token: refreshToken,
+      refresh_token: refresh_token,
       deleted_at: null,
     });
 
@@ -407,9 +407,26 @@ const getDashboardStats = async (req, res) => {
     // Get total pastors (users who have created churches)
     const totalPrayers = await PrayerRequest.countDocuments();
 
-    // Get total bibles (unique bible_id from notes)
-    const bibleIds = await Notes.distinct("bible_id");
-    const totalBibles = bibleIds.length;
+    // Get total bibles from DBT API
+    let totalBibles = 0;
+    try {
+      const dbtApiUrl = "https://4.dbt.io/api/bibles?v=4&key=851b4b78-fcf6-47fc-89c7-4e8d11446e26";
+      const response = await fetch(dbtApiUrl);
+      if (response.ok) {
+        const data = await response.json();
+        totalBibles = data.meta?.pagination?.total || 0;
+      } else {
+        console.error("DBT API error:", response.status, response.statusText);
+        // Fallback to counting unique bible_id from notes
+        const bibleIds = await Notes.distinct("bible_id");
+        totalBibles = bibleIds.length;
+      }
+    } catch (error) {
+      console.error("Error fetching bibles from DBT API:", error.message);
+      // Fallback to counting unique bible_id from notes
+      const bibleIds = await Notes.distinct("bible_id");
+      totalBibles = bibleIds.length;
+    }
 
     // Get total events
     const totalEvents = await Event.countDocuments({});
@@ -2134,7 +2151,7 @@ const deletePrayerRequestAdmin = async (req, res) => {
 module.exports = {
   adminSignin,
   adminLogout,
-  refreshToken,
+  refresh_token,
   getAdminMe,
   forgotPassword,
   resetPassword,

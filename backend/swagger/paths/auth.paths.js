@@ -278,68 +278,7 @@
  *                   type: string
  *                   example: Profile updated successfully
  *                 data:
- *                   type: object
- *                   properties:
- *                     _id:
- *                       type: string
- *                       example: '507f1f77bcf86cd799439011'
- *                     name:
- *                       type: string
- *                       example: 'John Doe'
- *                     email:
- *                       type: string
- *                       nullable: true
- *                       example: 'john.doe@example.com'
- *                     mobile:
- *                       type: string
- *                       example: '1234567890'
- *                     country_code:
- *                       type: string
- *                       example: '+1'
- *                     profile:
- *                       type: string
- *                       nullable: true
- *                       example: 'https://example.com/profile.jpg'
- *                     location:
- *                       type: object
- *                       properties:
- *                         address:
- *                           type: string
- *                           nullable: true
- *                           example: '123 Main St'
- *                         city:
- *                           type: string
- *                           nullable: true
- *                           example: 'New York'
- *                         type:
- *                           type: string
- *                           example: 'Point'
- *                         coordinates:
- *                           type: array
- *                           items:
- *                             type: number
- *                           example: [-74.006, 40.7128]
- *                     gender:
- *                       type: string
- *                       enum: ['male', 'female', 'other']
- *                       nullable: true
- *                       example: 'male'
- *                     date_of_birth:
- *                       type: string
- *                       format: date
- *                       nullable: true
- *                       example: '1990-01-01'
- *                     app_language:
- *                       type: string
- *                       example: 'en'
- *                     createdAt:
- *                       type: string
- *                       format: date-time
- *                       example: '2024-01-01T00:00:00.000Z'
- *                     updatedAt:
- *                       type: string
- *                       format: date-time
- *                       example: '2024-01-01T00:00:00.000Z'
+ *                   $ref: '#/components/schemas/User'
  *       400:
  *         description: Bad request
  *         content:

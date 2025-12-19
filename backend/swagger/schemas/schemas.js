@@ -56,6 +56,10 @@ module.exports = {
         type: 'string',
         example: '1234567890'
       },
+      password: {
+        type: 'string',
+        description: 'Hashed password (never returned in responses)'
+      },
       profile: {
         type: 'string',
         nullable: true,
@@ -76,16 +80,22 @@ module.exports = {
           },
           type: {
             type: 'string',
-            example: 'Point'
+            enum: ['Point'],
+            example: 'Point',
+            description: 'GeoJSON type (required for 2dsphere index)'
           },
           coordinates: {
             type: 'array',
             items: {
               type: 'number'
             },
-            example: [-74.006, 40.7128]
+            minItems: 2,
+            maxItems: 2,
+            example: [-74.006, 40.7128],
+            description: 'GeoJSON coordinates [longitude, latitude]'
           }
-        }
+        },
+        required: ['type', 'coordinates']
       },
       gender: {
         type: 'string',
@@ -100,14 +110,47 @@ module.exports = {
         example: '1990-01-01'
       },
       lord_accepted: {
-        type: 'boolean',
-        example: false
+        type: 'string',
+        example: 'No "I still have Questions"',
+        description: 'Spiritual commitment status (string, not boolean)'
+      },
+      otp: {
+        type: 'number',
+        nullable: true,
+        description: 'OTP code (never returned in responses)'
+      },
+      otp_expiry: {
+        type: 'string',
+        format: 'date-time',
+        nullable: true,
+        description: 'OTP expiration time (never returned in responses)'
       },
       device_type: {
         type: 'string',
-        enum: ['android', 'ios'],
+        enum: ['Android', 'iOS', 'android', 'ios'],
         nullable: true,
         example: 'android'
+      },
+      device_token: {
+        type: 'string',
+        nullable: true,
+        example: 'device-token-123'
+      },
+      fcm_token: {
+        type: 'string',
+        nullable: true,
+        example: 'fcm-token-123'
+      },
+      social_token: {
+        type: 'string',
+        nullable: true,
+        description: 'Social media authentication token (never returned in responses)'
+      },
+      social_type: {
+        type: 'string',
+        enum: ['google', 'facebook', 'apple'],
+        nullable: true,
+        example: 'google'
       },
       role: {
         type: 'string',
@@ -117,15 +160,40 @@ module.exports = {
       church_id: {
         type: 'string',
         nullable: true,
-        example: '507f1f77bcf86cd799439011'
+        example: '507f1f77bcf86cd799439011',
+        description: 'Reference to Church model'
       },
       app_language: {
         type: 'string',
-        example: 'en'
+        example: 'en',
+        default: 'en'
       },
       is_community_created: {
         type: 'number',
-        example: 0
+        example: 0,
+        default: 0
+      },
+      deleted_at: {
+        type: 'string',
+        format: 'date-time',
+        nullable: true,
+        description: 'Soft delete timestamp (never returned for active users)'
+      },
+      refresh_token: {
+        type: 'string',
+        nullable: true,
+        description: 'JWT refresh token (never returned in responses)'
+      },
+      reset_password_token: {
+        type: 'string',
+        nullable: true,
+        description: 'Password reset token (never returned in responses)'
+      },
+      reset_password_expiry: {
+        type: 'string',
+        format: 'date-time',
+        nullable: true,
+        description: 'Password reset token expiration (never returned in responses)'
       },
       createdAt: {
         type: 'string',
@@ -143,7 +211,7 @@ module.exports = {
   // Auth Schemas
   SignupRequest: {
     type: 'object',
-    required: ['name', 'mobile', 'countryCode', 'password', 'confirmPassword'],
+    required: ['name', 'mobile', 'country_code', 'password', 'confirmPassword'],
     properties: {
       name: {
         type: 'string',
@@ -158,7 +226,7 @@ module.exports = {
         type: 'string',
         example: '1234567890'
       },
-      countryCode: {
+      country_code: {
         type: 'string',
         example: '+1'
       },
@@ -191,38 +259,40 @@ module.exports = {
         nullable: true,
         example: -74.006
       },
-      deviceType: {
+      device_type: {
         type: 'string',
-        enum: ['android', 'ios'],
+        enum: ['Android', 'iOS', 'android', 'ios'],
         nullable: true,
-        example: 'android'
+        example: 'android',
+        description: 'Device type (case-insensitive: Android/iOS or android/ios)'
       },
-      deviceToken: {
+      device_token: {
         type: 'string',
         nullable: true,
         example: 'device-token-123'
       },
-      fcmToken: {
+      fcm_token: {
         type: 'string',
         nullable: true,
         example: 'fcm-token-123'
       },
-      appLanguage: {
+      app_language: {
         type: 'string',
         default: 'en',
-        example: 'en'
+        example: 'en',
+        description: 'App language preference (e.g., en, es, urd)'
       }
     }
   },
   SigninRequest: {
     type: 'object',
-    required: ['mobile', 'countryCode', 'password'],
+    required: ['mobile', 'country_code', 'password'],
     properties: {
       mobile: {
         type: 'string',
         example: '1234567890'
       },
-      countryCode: {
+      country_code: {
         type: 'string',
         example: '+1'
       },
@@ -230,18 +300,19 @@ module.exports = {
         type: 'string',
         example: 'password123'
       },
-      deviceType: {
+      device_type: {
         type: 'string',
-        enum: ['android', 'ios'],
+        enum: ['Android', 'iOS', 'android', 'ios'],
         nullable: true,
-        example: 'android'
+        example: 'android',
+        description: 'Device type (case-insensitive: Android/iOS or android/ios)'
       },
-      deviceToken: {
+      device_token: {
         type: 'string',
         nullable: true,
         example: 'device-token-123'
       },
-      fcmToken: {
+      fcm_token: {
         type: 'string',
         nullable: true,
         example: 'fcm-token-123'
@@ -250,13 +321,13 @@ module.exports = {
   },
   VerifyOTPRequest: {
     type: 'object',
-    required: ['mobile', 'countryCode', 'otp'],
+    required: ['mobile', 'country_code', 'otp'],
     properties: {
       mobile: {
         type: 'string',
         example: '1234567890'
       },
-      countryCode: {
+      country_code: {
         type: 'string',
         example: '+1'
       },
@@ -268,13 +339,13 @@ module.exports = {
   },
   ResendOTPRequest: {
     type: 'object',
-    required: ['mobile', 'countryCode'],
+    required: ['mobile', 'country_code'],
     properties: {
       mobile: {
         type: 'string',
         example: '1234567890'
       },
-      countryCode: {
+      country_code: {
         type: 'string',
         example: '+1'
       }
@@ -282,54 +353,77 @@ module.exports = {
   },
   SocialLoginRequest: {
     type: 'object',
-    required: ['socialToken', 'socialType'],
+    required: ['social_token', 'social_type'],
     properties: {
-      socialToken: {
+      social_token: {
         type: 'string',
-        example: 'social-token-123'
+        example: 'social-token-123',
+        description: 'Social media authentication token from provider'
       },
-      socialType: {
+      social_type: {
         type: 'string',
-        enum: ['google', 'facebook', 'apple'],
-        example: 'google'
+        enum: ['google', 'apple'],
+        example: 'google',
+        description: 'Social login provider (only google and apple are supported)'
       },
       name: {
         type: 'string',
         nullable: true,
-        example: 'John Doe'
+        example: 'John Doe',
+        description: 'User name (required for new users)'
       },
       email: {
         type: 'string',
         nullable: true,
-        example: 'john.doe@example.com'
+        example: 'john.doe@example.com',
+        description: 'User email (required for new users)'
       },
-      deviceType: {
+      mobile: {
         type: 'string',
-        enum: ['android', 'ios'],
         nullable: true,
-        example: 'android'
+        example: '1234567890',
+        description: 'User mobile number (optional)'
       },
-      deviceToken: {
+      country_code: {
+        type: 'string',
+        nullable: true,
+        example: '+1',
+        description: 'Country code (defaults to +1 if not provided)'
+      },
+      device_type: {
+        type: 'string',
+        enum: ['Android', 'iOS', 'android', 'ios'],
+        nullable: true,
+        example: 'android',
+        description: 'Device type (case-insensitive: Android/iOS or android/ios)'
+      },
+      device_token: {
         type: 'string',
         nullable: true,
         example: 'device-token-123'
       },
-      fcmToken: {
+      fcm_token: {
         type: 'string',
         nullable: true,
         example: 'fcm-token-123'
+      },
+      app_language: {
+        type: 'string',
+        default: 'en',
+        example: 'en',
+        description: 'App language preference (e.g., en, es, urd)'
       }
     }
   },
   ForgotPasswordRequest: {
     type: 'object',
-    required: ['mobile', 'countryCode'],
+    required: ['mobile', 'country_code'],
     properties: {
       mobile: {
         type: 'string',
         example: '1234567890'
       },
-      countryCode: {
+      country_code: {
         type: 'string',
         example: '+1'
       }
@@ -337,13 +431,13 @@ module.exports = {
   },
   ResetPasswordRequest: {
     type: 'object',
-    required: ['mobile', 'countryCode', 'otp', 'newPassword', 'confirmPassword'],
+    required: ['mobile', 'country_code', 'otp', 'newPassword', 'confirmPassword'],
     properties: {
       mobile: {
         type: 'string',
         example: '1234567890'
       },
-      countryCode: {
+      country_code: {
         type: 'string',
         example: '+1'
       },
@@ -364,9 +458,9 @@ module.exports = {
   },
   SetLanguageRequest: {
     type: 'object',
-    required: ['appLanguage'],
+    required: ['app_language'],
     properties: {
-      appLanguage: {
+      app_language: {
         type: 'string',
         example: 'en'
       }
@@ -374,49 +468,55 @@ module.exports = {
   },
   UpdateProfileRequest: {
     type: 'object',
+    description: 'All fields are optional. Sensitive fields (password, role, email, mobile, country_code) cannot be updated via this endpoint.',
     properties: {
       name: {
         type: 'string',
         example: 'John Doe'
       },
-      email: {
-        type: 'string',
-        format: 'email',
-        nullable: true,
-        example: 'john.doe@example.com'
-      },
-      mobile: {
-        type: 'string',
-        example: '1234567890'
-      },
-      country_code: {
-        type: 'string',
-        example: '+1'
-      },
       profile: {
         type: 'string',
         nullable: true,
-        example: 'https://example.com/profile.jpg'
+        example: 'https://example.com/profile.jpg',
+        description: 'Profile image URL'
       },
-      address: {
-        type: 'string',
-        nullable: true,
-        example: '123 Main St'
-      },
-      city: {
-        type: 'string',
-        nullable: true,
-        example: 'New York'
-      },
-      lat: {
-        type: 'number',
-        nullable: true,
-        example: 40.7128
-      },
-      lng: {
-        type: 'number',
-        nullable: true,
-        example: -74.006
+      location: {
+        type: 'object',
+        description: 'Location object. Can provide address, city, lat/lng, or coordinates. Must be valid GeoJSON format.',
+        properties: {
+          address: {
+            type: 'string',
+            nullable: true,
+            example: '123 Main St'
+          },
+          city: {
+            type: 'string',
+            nullable: true,
+            example: 'New York'
+          },
+          lat: {
+            type: 'number',
+            nullable: true,
+            example: 40.7128,
+            description: 'Latitude (will be converted to coordinates array with lng)'
+          },
+          lng: {
+            type: 'number',
+            nullable: true,
+            example: -74.006,
+            description: 'Longitude (will be converted to coordinates array with lat)'
+          },
+          coordinates: {
+            type: 'array',
+            items: {
+              type: 'number'
+            },
+            minItems: 2,
+            maxItems: 2,
+            example: [-74.006, 40.7128],
+            description: 'GeoJSON coordinates [longitude, latitude]'
+          }
+        }
       },
       gender: {
         type: 'string',
@@ -432,7 +532,7 @@ module.exports = {
       },
       device_type: {
         type: 'string',
-        enum: ['android', 'ios', 'Android', 'iOS'],
+        enum: ['Android', 'iOS', 'android', 'ios'],
         nullable: true,
         example: 'android'
       },
@@ -448,7 +548,8 @@ module.exports = {
       },
       app_language: {
         type: 'string',
-        example: 'en'
+        example: 'en',
+        description: 'App language preference (e.g., en, es, urd)'
       }
     }
   },
@@ -720,10 +821,6 @@ module.exports = {
         nullable: true,
         example: 'https://zoom.us/j/123456789'
       },
-      user_id: {
-        type: 'string',
-        example: '507f1f77bcf86cd799439012'
-      },
       createdAt: {
         type: 'string',
         format: 'date-time',
@@ -756,25 +853,29 @@ module.exports = {
       },
       start_date: {
         type: 'string',
-        format: 'date',
+        format: 'date-time',
         nullable: true,
-        example: '2024-01-07'
+        example: '2024-01-07T00:00:00.000Z',
+        description: 'Event start date (Date type in model, accepts ISO 8601 date-time string)'
       },
       start_time: {
         type: 'string',
         nullable: true,
-        example: '10:00 AM'
+        example: '10:00 AM',
+        description: 'Event start time (string format)'
       },
       end_date: {
         type: 'string',
-        format: 'date',
+        format: 'date-time',
         nullable: true,
-        example: '2024-01-07'
+        example: '2024-01-07T00:00:00.000Z',
+        description: 'Event end date (Date type in model, accepts ISO 8601 date-time string)'
       },
       end_time: {
         type: 'string',
         nullable: true,
-        example: '12:00 PM'
+        example: '12:00 PM',
+        description: 'Event end time (string format)'
       },
       virtual_link_or_location: {
         type: 'string',
@@ -802,25 +903,29 @@ module.exports = {
       },
       start_date: {
         type: 'string',
-        format: 'date',
+        format: 'date-time',
         nullable: true,
-        example: '2024-01-07'
+        example: '2024-01-07T00:00:00.000Z',
+        description: 'Event start date (Date type in model, accepts ISO 8601 date-time string)'
       },
       start_time: {
         type: 'string',
         nullable: true,
-        example: '10:00 AM'
+        example: '10:00 AM',
+        description: 'Event start time (string format)'
       },
       end_date: {
         type: 'string',
-        format: 'date',
+        format: 'date-time',
         nullable: true,
-        example: '2024-01-07'
+        example: '2024-01-07T00:00:00.000Z',
+        description: 'Event end date (Date type in model, accepts ISO 8601 date-time string)'
       },
       end_time: {
         type: 'string',
         nullable: true,
-        example: '12:00 PM'
+        example: '12:00 PM',
+        description: 'Event end time (string format)'
       },
       virtual_link_or_location: {
         type: 'string',
@@ -1209,12 +1314,14 @@ module.exports = {
       },
       date: {
         type: 'string',
-        format: 'date',
-        example: '2024-01-07'
+        format: 'date-time',
+        example: '2024-01-07T00:00:00.000Z',
+        description: 'Prayer request date (Date type in model)'
       },
       time: {
         type: 'string',
-        example: '10:00 AM'
+        example: '10:00 AM',
+        description: 'Prayer request time (string format)'
       },
       name: {
         type: 'string',
@@ -1266,8 +1373,9 @@ module.exports = {
       },
       date: {
         type: 'string',
-        format: 'date',
-        example: '2024-01-07'
+        format: 'date-time',
+        example: '2024-01-07T00:00:00.000Z',
+        description: 'Prayer request date (will be converted to Date type)'
       },
       time: {
         type: 'string',
@@ -1302,8 +1410,9 @@ module.exports = {
       },
       date: {
         type: 'string',
-        format: 'date',
-        example: '2024-01-07'
+        format: 'date-time',
+        example: '2024-01-07T00:00:00.000Z',
+        description: 'Prayer request date (will be converted to Date type)'
       },
       time: {
         type: 'string',
@@ -1446,7 +1555,7 @@ module.exports = {
             example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
             description: 'JWT access token (expires in 15 minutes)'
           },
-          refreshToken: {
+          refresh_token: {
             type: 'string',
             example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
             description: 'JWT refresh token (expires in 7 days)'
@@ -1489,9 +1598,9 @@ module.exports = {
   },
   RefreshTokenRequest: {
     type: 'object',
-    required: ['refreshToken'],
+    required: ['refresh_token'],
     properties: {
-      refreshToken: {
+      refresh_token: {
         type: 'string',
         example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
         description: 'Valid refresh token'
@@ -1725,11 +1834,89 @@ module.exports = {
   },
   UpdateUserRequest: {
     type: 'object',
+    description: 'Admin endpoint to update user. Sensitive fields (password, role, email, mobile, country_code) cannot be updated.',
     properties: {
-      name: { type: 'string', example: 'John Doe' },
-      email: { type: 'string', format: 'email', example: 'john@example.com' },
-      mobile: { type: 'string', example: '1234567890' },
-      role: { type: 'string', enum: ['user', 'admin'], example: 'user' }
+      name: {
+        type: 'string',
+        example: 'John Doe'
+      },
+      profile: {
+        type: 'string',
+        nullable: true,
+        example: 'https://example.com/profile.jpg'
+      },
+      location: {
+        type: 'object',
+        description: 'Location object. Must be valid GeoJSON format with type and coordinates.',
+        properties: {
+          address: {
+            type: 'string',
+            nullable: true,
+            example: '123 Main St'
+          },
+          city: {
+            type: 'string',
+            nullable: true,
+            example: 'New York'
+          },
+          lat: {
+            type: 'number',
+            nullable: true,
+            example: 40.7128
+          },
+          lng: {
+            type: 'number',
+            nullable: true,
+            example: -74.006
+          },
+          coordinates: {
+            type: 'array',
+            items: {
+              type: 'number'
+            },
+            minItems: 2,
+            maxItems: 2,
+            example: [-74.006, 40.7128]
+          }
+        }
+      },
+      gender: {
+        type: 'string',
+        enum: ['male', 'female', 'other'],
+        nullable: true,
+        example: 'male'
+      },
+      date_of_birth: {
+        type: 'string',
+        format: 'date',
+        nullable: true,
+        example: '1990-01-01'
+      },
+      device_type: {
+        type: 'string',
+        enum: ['Android', 'iOS', 'android', 'ios'],
+        nullable: true,
+        example: 'android'
+      },
+      device_token: {
+        type: 'string',
+        nullable: true,
+        example: 'device-token-123'
+      },
+      fcm_token: {
+        type: 'string',
+        nullable: true,
+        example: 'fcm-token-123'
+      },
+      app_language: {
+        type: 'string',
+        example: 'en'
+      },
+      church_id: {
+        type: 'string',
+        nullable: true,
+        example: '507f1f77bcf86cd799439011'
+      }
     }
   },
 
@@ -1842,61 +2029,77 @@ module.exports = {
     properties: {
       _id: { type: 'string', example: '507f1f77bcf86cd799439011' },
       name: { type: 'string', example: 'John Doe' },
-      contactEmail: { type: 'string', example: 'john@example.com' },
-      contactMobile: { type: 'string', example: '1234567890' },
+      email: { type: 'string', nullable: true, example: 'john@example.com' },
+      phone: { type: 'string', nullable: true, example: '1234567890' },
+      contact: { type: 'string', nullable: true, example: 'john@example.com, +1-123-456-7890', description: 'Combined contact info' },
       type: {
         type: 'string',
         enum: ['New Visitor', 'Prayer Request', 'Counseling', 'Membership', 'Baptism', 'Other'],
-        example: 'New Visitor'
+        example: 'New Visitor',
+        default: 'Other'
       },
-      assignedTo: { type: 'string', example: '507f1f77bcf86cd799439012' },
+      assigned_to: { type: 'string', nullable: true, example: 'Pastor John Smith', description: 'Name of pastor/admin assigned' },
+      assigned_to_id: { type: 'string', nullable: true, example: '507f1f77bcf86cd799439012', description: 'User ID of assigned person' },
+      due_date: { type: 'string', format: 'date-time', nullable: true, example: '2024-01-20T00:00:00.000Z' },
       status: {
         type: 'string',
         enum: ['pending', 'in_progress', 'completed'],
-        example: 'pending'
+        example: 'pending',
+        default: 'pending'
       },
-      dueDate: { type: 'string', format: 'date-time' },
-      description: { type: 'string', example: 'Follow up needed' },
-      createdAt: { type: 'string', format: 'date-time' },
-      updatedAt: { type: 'string', format: 'date-time' }
+      description: { type: 'string', nullable: true, example: 'Follow up needed' },
+      notes: { type: 'string', nullable: true, example: 'Additional notes about the follow-up' },
+      user_id: { type: 'string', nullable: true, example: '507f1f77bcf86cd799439013', description: 'Related user ID if applicable' },
+      created_by: { type: 'string', nullable: true, example: '507f1f77bcf86cd799439014', description: 'User ID who created this request' },
+      createdAt: { type: 'string', format: 'date-time', example: '2024-01-15T00:00:00.000Z' },
+      updatedAt: { type: 'string', format: 'date-time', example: '2024-01-15T00:00:00.000Z' }
     }
   },
   CreateFollowUpRequest: {
     type: 'object',
-    required: ['name', 'contactEmail', 'contactMobile', 'type'],
+    required: ['name', 'type'],
     properties: {
       name: { type: 'string', example: 'John Doe' },
-      contactEmail: { type: 'string', format: 'email', example: 'john@example.com' },
-      contactMobile: { type: 'string', example: '1234567890' },
+      email: { type: 'string', format: 'email', nullable: true, example: 'john@example.com' },
+      phone: { type: 'string', nullable: true, example: '1234567890' },
+      contact: { type: 'string', nullable: true, example: 'john@example.com, +1-123-456-7890' },
       type: {
         type: 'string',
         enum: ['New Visitor', 'Prayer Request', 'Counseling', 'Membership', 'Baptism', 'Other'],
-        example: 'New Visitor'
+        example: 'New Visitor',
+        default: 'Other'
       },
-      assignedTo: { type: 'string', example: '507f1f77bcf86cd799439012' },
+      assigned_to: { type: 'string', nullable: true, example: 'Pastor John Smith' },
+      assigned_to_id: { type: 'string', nullable: true, example: '507f1f77bcf86cd799439012' },
+      due_date: { type: 'string', format: 'date-time', nullable: true, example: '2024-01-20T00:00:00.000Z' },
       status: {
         type: 'string',
         enum: ['pending', 'in_progress', 'completed'],
-        example: 'pending'
+        example: 'pending',
+        default: 'pending'
       },
-      dueDate: { type: 'string', format: 'date-time' },
-      description: { type: 'string', example: 'Follow up needed' }
+      description: { type: 'string', nullable: true, example: 'Follow up needed' },
+      notes: { type: 'string', nullable: true, example: 'Additional notes' },
+      user_id: { type: 'string', nullable: true, example: '507f1f77bcf86cd799439013' }
     }
   },
   UpdateFollowUpRequest: {
     type: 'object',
     properties: {
       name: { type: 'string', example: 'John Doe' },
-      contactEmail: { type: 'string', format: 'email', example: 'john@example.com' },
-      contactMobile: { type: 'string', example: '1234567890' },
+      email: { type: 'string', format: 'email', nullable: true, example: 'john@example.com' },
+      phone: { type: 'string', nullable: true, example: '1234567890' },
+      contact: { type: 'string', nullable: true, example: 'john@example.com, +1-123-456-7890' },
       type: {
         type: 'string',
         enum: ['New Visitor', 'Prayer Request', 'Counseling', 'Membership', 'Baptism', 'Other'],
         example: 'New Visitor'
       },
-      assignedTo: { type: 'string', example: '507f1f77bcf86cd799439012' },
-      dueDate: { type: 'string', format: 'date-time' },
-      description: { type: 'string', example: 'Follow up needed' }
+      assigned_to: { type: 'string', nullable: true, example: 'Pastor John Smith' },
+      assigned_to_id: { type: 'string', nullable: true, example: '507f1f77bcf86cd799439012' },
+      due_date: { type: 'string', format: 'date-time', nullable: true, example: '2024-01-20T00:00:00.000Z' },
+      description: { type: 'string', nullable: true, example: 'Follow up needed' },
+      notes: { type: 'string', nullable: true, example: 'Additional notes' }
     }
   },
   UpdateFollowUpStatusRequest: {
@@ -2060,17 +2263,6 @@ module.exports = {
       description: { type: 'string', example: 'Please pray for healing' },
       createdAt: { type: 'string', format: 'date-time' },
       updatedAt: { type: 'string', format: 'date-time' }
-    }
-  },
-  UpdatePrayerRequestRequest: {
-    type: 'object',
-    properties: {
-      name: { type: 'string', example: 'John Doe' },
-      mobileNumber: { type: 'string', example: '1234567890' },
-      dialCode: { type: 'string', example: '+1' },
-      description: { type: 'string', example: 'Updated description' },
-      date: { type: 'string', format: 'date', example: '2024-01-20' },
-      time: { type: 'string', example: '11:00 AM' }
     }
   },
   UpdatePrayerRequestStatusRequest: {
@@ -2339,6 +2531,7 @@ module.exports = {
   },
   Video: {
     type: 'object',
+    description: 'Video response format (controller transforms model fields to camelCase)',
     properties: {
       _id: { type: 'string', example: '507f1f77bcf86cd799439011' },
       title: { type: 'string', example: 'Sunday Sermon - Faith in Action' },
@@ -2347,23 +2540,26 @@ module.exports = {
         enum: ['Sermon', 'Worship', 'Teaching', 'Prayer', 'Documentary', 'Other'],
         example: 'Sermon'
       },
-      videoUrl: { type: 'string', example: 'https://example.com/video.mp4' },
-      thumbnailUrl: { type: 'string', nullable: true, example: 'https://example.com/thumbnail.jpg' },
+      videoUrl: { type: 'string', example: 'https://example.com/video.mp4', description: 'Transformed from video_url' },
+      thumbnailUrl: { type: 'string', nullable: true, example: 'https://example.com/thumbnail.jpg', description: 'Transformed from thumbnail_url' },
       description: { type: 'string', nullable: true, example: 'A powerful sermon about faith in action' },
-      duration: { type: 'string', nullable: true, example: '45:30' },
-      views: { type: 'number', example: 1250 },
+      duration: { type: 'string', nullable: true, example: '45:30', description: 'Format: "45:30" (MM:SS or HH:MM:SS)' },
+      views: { type: 'number', example: 1250, default: 0 },
       status: {
         type: 'string',
         enum: ['published', 'draft'],
-        example: 'published'
+        example: 'published',
+        default: 'draft'
       },
-      uploadDate: { type: 'string', format: 'date-time', example: '2024-01-15T00:00:00.000Z' },
+      uploadDate: { type: 'string', format: 'date-time', example: '2024-01-15T00:00:00.000Z', description: 'Transformed from createdAt' },
       uploadedBy: {
         type: 'object',
+        nullable: true,
+        description: 'Transformed from uploaded_by (populated user object)',
         properties: {
           _id: { type: 'string', example: '507f1f77bcf86cd799439012' },
           name: { type: 'string', example: 'Admin User' },
-          email: { type: 'string', example: 'admin@example.com' },
+          email: { type: 'string', nullable: true, example: 'admin@example.com' },
           profile: { type: 'string', nullable: true, example: 'https://example.com/profile.jpg' }
         }
       },
@@ -2422,7 +2618,18 @@ module.exports = {
                 views: { type: 'number', example: 1250 },
                 status: { type: 'string', example: 'published' },
                 uploadDate: { type: 'string', format: 'date-time' },
-                uploadedBy: { type: 'object' }
+                uploadedBy: { 
+                  type: 'object',
+                  nullable: true,
+                  properties: {
+                    _id: { type: 'string' },
+                    name: { type: 'string' },
+                    email: { type: 'string', nullable: true },
+                    profile: { type: 'string', nullable: true }
+                  }
+                },
+                createdAt: { type: 'string', format: 'date-time' },
+                updatedAt: { type: 'string', format: 'date-time' }
               }
             }
           },
