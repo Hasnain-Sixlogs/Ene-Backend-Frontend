@@ -413,13 +413,19 @@ const getDashboardStats = async (req, res) => {
     try {
       const dbtApiUrl = "https://4.dbt.io/api/bibles?v=4&key=851b4b78-fcf6-47fc-89c7-4e8d11446e26";
       
+      // Create AbortController for timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 20000); // 20 second timeout
+      
       const response = await fetch(dbtApiUrl, {
         headers: {
           'User-Agent': 'Ene-Backend/1.0',
           'Accept': 'application/json',
         },
-        timeout: 15000, // node-fetch supports timeout option
+        signal: controller.signal, // Use AbortController signal instead of timeout option
       });
+      
+      clearTimeout(timeoutId);
       
       if (response.ok) {
         const data = await response.json();
@@ -431,7 +437,11 @@ const getDashboardStats = async (req, res) => {
         totalBibles = bibleIds.length;
       }
     } catch (error) {
-      console.error("Error fetching bibles from DBT API:", error.message);
+      if (error.name === 'AbortError') {
+        console.error("Error fetching bibles from DBT API: Request timeout after 20 seconds");
+      } else {
+        console.error("Error fetching bibles from DBT API:", error.message);
+      }
       // Fallback to counting unique bible_id from notes
       const bibleIds = await Notes.distinct("bible_id");
       totalBibles = bibleIds.length;
