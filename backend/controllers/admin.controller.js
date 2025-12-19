@@ -13,6 +13,7 @@ const {
   verifyrefresh_token,
 } = require("../utils/jwt");
 const crypto = require("crypto");
+const fetch = require("node-fetch");
 
 /**
  * Admin login with email only
@@ -411,7 +412,15 @@ const getDashboardStats = async (req, res) => {
     let totalBibles = 0;
     try {
       const dbtApiUrl = "https://4.dbt.io/api/bibles?v=4&key=851b4b78-fcf6-47fc-89c7-4e8d11446e26";
-      const response = await fetch(dbtApiUrl);
+      
+      const response = await fetch(dbtApiUrl, {
+        headers: {
+          'User-Agent': 'Ene-Backend/1.0',
+          'Accept': 'application/json',
+        },
+        timeout: 10000, // 10 second timeout
+      });
+      
       if (response.ok) {
         const data = await response.json();
         totalBibles = data.meta?.pagination?.total || 0;
