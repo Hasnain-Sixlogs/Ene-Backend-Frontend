@@ -408,20 +408,26 @@ const getDashboardStats = async (req, res) => {
     // Get total pastors (users who have created churches)
     const totalPrayers = await PrayerRequest.countDocuments();
 
-    // Get total bibles from DBT API (non-blocking with short timeout)
+    // Get total bibles from DBT API (non-blocking with timeout)
     let totalBibles = 0;
     
     // Use fallback immediately for fast response
     const bibleIds = await Notes.distinct("bible_id");
     totalBibles = bibleIds.length;
+    console.log(`[DBT API] Fallback count from notes: ${totalBibles}`);
     
-    // Try to get from DBT API, but don't wait more than 3 seconds
+    // Try to get from DBT API, but don't wait more than 5 seconds
     const dbtApiPromise = (async () => {
+      const startTime = Date.now();
       try {
         const dbtApiUrl = "https://4.dbt.io/api/bibles?v=4&key=851b4b78-fcf6-47fc-89c7-4e8d11446e26";
+        console.log(`[DBT API] Attempting to fetch from: ${dbtApiUrl}`);
         
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000); // Only wait 3 seconds
+        const timeoutId = setTimeout(() => {
+          console.log(`[DBT API] Timeout after 5 seconds`);
+          controller.abort();
+        }, 5000); // Increased to 5 seconds
         
         const response = await fetch(dbtApiUrl, {
           headers: {
@@ -432,31 +438,47 @@ const getDashboardStats = async (req, res) => {
         });
         
         clearTimeout(timeoutId);
+        const elapsed = Date.now() - startTime;
+        console.log(`[DBT API] Response received in ${elapsed}ms, status: ${response.status}`);
         
         if (response.ok) {
           const data = await response.json();
-          return data.meta?.pagination?.total || 0;
+          const count = data.meta?.pagination?.total || 0;
+          console.log(`[DBT API] Success! Total bibles: ${count}`);
+          return count;
+        } else {
+          console.error(`[DBT API] HTTP error: ${response.status} ${response.statusText}`);
         }
       } catch (error) {
-        // Silently fail - we already have fallback
-        if (error.name !== 'AbortError') {
-          console.error("Error fetching bibles from DBT API:", error.message);
+        const elapsed = Date.now() - startTime;
+        if (error.name === 'AbortError') {
+          console.error(`[DBT API] Request aborted after ${elapsed}ms (timeout)`);
+        } else {
+          console.error(`[DBT API] Error after ${elapsed}ms:`, error.message);
+          console.error(`[DBT API] Error details:`, error);
         }
       }
       return null;
     })();
     
-    // Race: wait max 3 seconds for DBT API, otherwise use fallback
+    // Race: wait max 5 seconds for DBT API, otherwise use fallback
     try {
       const dbtCount = await Promise.race([
         dbtApiPromise,
-        new Promise(resolve => setTimeout(() => resolve(null), 3000))
+        new Promise(resolve => setTimeout(() => {
+          console.log(`[DBT API] Promise.race timeout - using fallback`);
+          resolve(null);
+        }, 5000))
       ]);
       
       if (dbtCount !== null && dbtCount > 0) {
+        console.log(`[DBT API] Using DBT API count: ${dbtCount}`);
         totalBibles = dbtCount;
+      } else {
+        console.log(`[DBT API] Using fallback count: ${totalBibles}`);
       }
     } catch (error) {
+      console.error(`[DBT API] Promise.race error:`, error.message);
       // Already using fallback, ignore
     }
 
