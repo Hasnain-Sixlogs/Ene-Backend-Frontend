@@ -408,43 +408,56 @@ const getDashboardStats = async (req, res) => {
     // Get total pastors (users who have created churches)
     const totalPrayers = await PrayerRequest.countDocuments();
 
-    // Get total bibles from DBT API
+    // Get total bibles from DBT API (non-blocking with short timeout)
     let totalBibles = 0;
+    
+    // Use fallback immediately for fast response
+    const bibleIds = await Notes.distinct("bible_id");
+    totalBibles = bibleIds.length;
+    
+    // Try to get from DBT API, but don't wait more than 3 seconds
+    const dbtApiPromise = (async () => {
+      try {
+        const dbtApiUrl = "https://4.dbt.io/api/bibles?v=4&key=851b4b78-fcf6-47fc-89c7-4e8d11446e26";
+        
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000); // Only wait 3 seconds
+        
+        const response = await fetch(dbtApiUrl, {
+          headers: {
+            'User-Agent': 'Ene-Backend/1.0',
+            'Accept': 'application/json',
+          },
+          signal: controller.signal,
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (response.ok) {
+          const data = await response.json();
+          return data.meta?.pagination?.total || 0;
+        }
+      } catch (error) {
+        // Silently fail - we already have fallback
+        if (error.name !== 'AbortError') {
+          console.error("Error fetching bibles from DBT API:", error.message);
+        }
+      }
+      return null;
+    })();
+    
+    // Race: wait max 3 seconds for DBT API, otherwise use fallback
     try {
-      const dbtApiUrl = "https://4.dbt.io/api/bibles?v=4&key=851b4b78-fcf6-47fc-89c7-4e8d11446e26";
+      const dbtCount = await Promise.race([
+        dbtApiPromise,
+        new Promise(resolve => setTimeout(() => resolve(null), 3000))
+      ]);
       
-      // Create AbortController for timeout
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 20000); // 20 second timeout
-      
-      const response = await fetch(dbtApiUrl, {
-        headers: {
-          'User-Agent': 'Ene-Backend/1.0',
-          'Accept': 'application/json',
-        },
-        signal: controller.signal, // Use AbortController signal instead of timeout option
-      });
-      
-      clearTimeout(timeoutId);
-      
-      if (response.ok) {
-        const data = await response.json();
-        totalBibles = data.meta?.pagination?.total || 0;
-      } else {
-        console.error("DBT API error:", response.status, response.statusText);
-        // Fallback to counting unique bible_id from notes
-        const bibleIds = await Notes.distinct("bible_id");
-        totalBibles = bibleIds.length;
+      if (dbtCount !== null && dbtCount > 0) {
+        totalBibles = dbtCount;
       }
     } catch (error) {
-      if (error.name === 'AbortError') {
-        console.error("Error fetching bibles from DBT API: Request timeout after 20 seconds");
-      } else {
-        console.error("Error fetching bibles from DBT API:", error.message);
-      }
-      // Fallback to counting unique bible_id from notes
-      const bibleIds = await Notes.distinct("bible_id");
-      totalBibles = bibleIds.length;
+      // Already using fallback, ignore
     }
 
     // Get total events
