@@ -408,15 +408,17 @@ const getDashboardStats = async (req, res) => {
     // Get total pastors (users who have created churches)
     const totalPrayers = await PrayerRequest.countDocuments();
 
-    // Get total bibles from DBT API (non-blocking with timeout)
+    // Get total bibles from DBT API
+    // Strategy: Try DBT API with longer timeout, but only wait 2 seconds max
+    // If DBT API responds quickly, use it; otherwise use fallback
     let totalBibles = 0;
     
-    // Use fallback immediately for fast response
+    // Get fallback count first
     const bibleIds = await Notes.distinct("bible_id");
     totalBibles = bibleIds.length;
     console.log(`[DBT API] Fallback count from notes: ${totalBibles}`);
     
-    // Try to get from DBT API, but don't wait more than 5 seconds
+    // Try DBT API with longer timeout (15s), but only wait 2 seconds for response
     const dbtApiPromise = (async () => {
       const startTime = Date.now();
       try {
@@ -425,9 +427,9 @@ const getDashboardStats = async (req, res) => {
         
         const controller = new AbortController();
         const timeoutId = setTimeout(() => {
-          console.log(`[DBT API] Timeout after 5 seconds`);
+          console.log(`[DBT API] Request timeout after 15 seconds`);
           controller.abort();
-        }, 5000); // Increased to 5 seconds
+        }, 15000); // Longer timeout for slow networks
         
         const response = await fetch(dbtApiUrl, {
           headers: {
@@ -455,20 +457,24 @@ const getDashboardStats = async (req, res) => {
           console.error(`[DBT API] Request aborted after ${elapsed}ms (timeout)`);
         } else {
           console.error(`[DBT API] Error after ${elapsed}ms:`, error.message);
-          console.error(`[DBT API] Error details:`, error);
         }
       }
       return null;
     })();
     
-    // Race: wait max 5 seconds for DBT API, otherwise use fallback
+    // Wait for DBT API response - longer timeout on Cloud Run (production)
+    // Locally it takes ~2 seconds, so 3 seconds is enough
+    // On Cloud Run it takes 10+ seconds, so we need 15 seconds there
+    const isProduction = process.env.NODE_ENV === 'production';
+    const waitTime = isProduction ? 15000 : 3000; // 15s on Cloud Run, 3s locally
+    
     try {
       const dbtCount = await Promise.race([
         dbtApiPromise,
         new Promise(resolve => setTimeout(() => {
-          console.log(`[DBT API] Promise.race timeout - using fallback`);
+          console.log(`[DBT API] Timeout after ${waitTime/1000} seconds - using fallback`);
           resolve(null);
-        }, 5000))
+        }, waitTime))
       ]);
       
       if (dbtCount !== null && dbtCount > 0) {
