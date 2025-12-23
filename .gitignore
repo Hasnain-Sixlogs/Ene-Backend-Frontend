@@ -12,6 +12,9 @@
 /backend/uploads
 /backend/*.md
 /backend/package-lock.json
+/backend/config/gcp-service-account.json
+/backend/config/firbase_service_account.json
+/backend/config/firebase_credentials.json
 
 /frontend/.env
 /frontend/node_modules
