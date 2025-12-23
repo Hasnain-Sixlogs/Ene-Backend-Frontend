@@ -2,6 +2,7 @@ const User = require("../models/user.model");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { generateToken, verifyToken } = require("../utils/jwt");
+const { processUploadedFile } = require("../utils/fileUpload");
 
 const generateOTP = () => {
   // return Math.floor(1000 + Math.random() * 9000);
@@ -720,6 +721,23 @@ const updateProfile = async (req, res) => {
     delete rest.email;
     delete rest.mobile;
     delete rest.country_code;
+    
+    // Handle profile image upload
+    if (req.file) {
+      try {
+        const profileImagePath = await processUploadedFile(req.file, 'profiles');
+        if (profileImagePath) {
+          rest.profile = profileImagePath;
+        }
+      } catch (uploadError) {
+        console.error("Profile image upload error:", uploadError);
+        return res.status(500).json({
+          success: false,
+          message: "Error uploading profile image",
+          error: process.env.NODE_ENV === "development" ? uploadError.message : undefined,
+        });
+      }
+    }
     
     // Handle location update - ensure proper GeoJSON format
     if (rest.location) {

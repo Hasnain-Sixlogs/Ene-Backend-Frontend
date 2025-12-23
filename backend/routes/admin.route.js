@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/admin.controller');
 const { authenticateAdmin } = require('../middlewares/admin.middleware');
+const { uploadFile } = require('../utils/fileUpload');
 
 // Admin authentication routes
 router.post('/signin', adminController.adminSignin);
@@ -22,7 +23,7 @@ router.get('/dashboard/total-users', authenticateAdmin, adminController.getTotal
 // Users Management routes
 router.get('/users', authenticateAdmin, adminController.getAllUsers);
 router.get('/users/:id', authenticateAdmin, adminController.getUserById);
-router.put('/users/:id', authenticateAdmin, adminController.updateUser);
+router.put('/users/:id', authenticateAdmin, uploadFile('profile'), adminController.updateUser);
 
 // Pastor Requests routes
 router.get('/pastor-requests', authenticateAdmin, adminController.getAllPastorRequests);

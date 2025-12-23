@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/auth.controller');
 const { authenticate } = require('../middlewares/auth.middleware');
+const { uploadFile } = require('../utils/fileUpload');
 
 router.post('/signup', authController.signup);
 
@@ -21,7 +22,7 @@ router.put('/set-language', authenticate, authController.setLanguage);
 
 router.put('/accept-lord', authenticate, authController.acceptLord);
 
-router.put('/update-profile', authenticate, authController.updateProfile);
+router.put('/update-profile', authenticate, uploadFile('profile'), authController.updateProfile);
 
 module.exports = router;
 

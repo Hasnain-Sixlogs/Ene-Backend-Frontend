@@ -13,6 +13,7 @@ const {
   verifyrefresh_token,
 } = require("../utils/jwt");
 const crypto = require("crypto");
+const { processUploadedFile } = require("../utils/fileUpload");
 
 /**
  * Admin login with email only
@@ -410,7 +411,8 @@ const getDashboardStats = async (req, res) => {
     // Get total bibles from DBT API
     let totalBibles = 0;
     try {
-      const dbtApiUrl = "https://4.dbt.io/api/bibles?v=4&key=851b4b78-fcf6-47fc-89c7-4e8d11446e26";
+      const dbtApiUrl =
+        "https://4.dbt.io/api/bibles?v=4&key=851b4b78-fcf6-47fc-89c7-4e8d11446e26";
       const response = await fetch(dbtApiUrl);
       if (response.ok) {
         const data = await response.json();
@@ -626,6 +628,7 @@ const getRecentUsers = async (req, res) => {
       mobileNumber: user.mobile || "N/A",
       location: user.location?.address || "N/A",
       city: user.location?.city || "N/A",
+      social_type: user.social_type || "email",
       createdAt: user.createdAt,
     }));
 
@@ -740,6 +743,7 @@ const getAllUsers = async (req, res) => {
       mobileNumber: user.mobile || "N/A",
       location: user.location?.address || "N/A",
       city: user.location?.city || "N/A",
+      social_type: user.social_type || "email",
       createdAt: user.createdAt,
     }));
 
@@ -822,22 +826,58 @@ const updateUser = async (req, res) => {
     delete updateData.mobile;
     delete updateData.country_code;
 
+    // Handle profile image upload
+    if (req.file) {
+      try {
+        console.log("File received:", req.file.originalname, req.file.size, "bytes");
+        const profileImagePath = await processUploadedFile(req.file, 'profiles');
+        console.log("Profile image path:", profileImagePath);
+        if (profileImagePath) {
+          updateData.profile = profileImagePath;
+        }
+      } catch (uploadError) {
+        console.error("Profile image upload error:", uploadError);
+        return res.status(500).json({
+          success: false,
+          message: "Error uploading profile image",
+          error: process.env.NODE_ENV === "development" ? uploadError.message : undefined,
+        });
+      }
+    } else {
+      console.log("No file received in req.file");
+      console.log("Request body keys:", Object.keys(req.body));
+    }
+
     // Handle location update - ensure proper GeoJSON format
     if (updateData.location) {
+      // Parse location if it comes as JSON string (from FormData)
+      let locationData = updateData.location;
+      if (typeof locationData === 'string') {
+        try {
+          locationData = JSON.parse(locationData);
+        } catch (parseError) {
+          console.error("Error parsing location JSON:", parseError);
+          locationData = {};
+        }
+      }
+      
       // Get existing user to preserve coordinates if not provided
       const existingUser = await User.findById(id).select("location");
       const existingLocation = existingUser?.location?.toObject() || {};
 
-      const { address, city, lat, lng, coordinates } = updateData.location;
+      const { address, city, lat, lng, coordinates } = locationData;
 
       // Build location object with proper GeoJSON format
       const locationUpdate = {
-        address: address !== undefined ? address : (existingLocation.address || null),
-        city: city !== undefined ? city : (existingLocation.city || null),
+        address:
+          address !== undefined ? address : existingLocation.address || null,
+        city: city !== undefined ? city : existingLocation.city || null,
         type: "Point",
-        coordinates: coordinates || 
-          (lng !== undefined && lat !== undefined ? [Number(lng), Number(lat)] : 
-          (existingLocation.coordinates || [0, 0]))
+        coordinates:
+          coordinates ||
+          (lng !== undefined && lat !== undefined
+            ? [Number(lng), Number(lat)]
+            : existingLocation.coordinates || [0, 0]),
       };
 
       updateData.location = locationUpdate;
@@ -860,11 +900,23 @@ const updateUser = async (req, res) => {
       });
     }
 
+    // Convert profile image path to URL if needed (for GCS or local)
+    const { getFileUrl } = require('../utils/fileUpload');
+    let userObj = user.toObject();
+    if (userObj.profile) {
+      try {
+        userObj.profile = await getFileUrl(userObj.profile);
+      } catch (urlError) {
+        console.error("Error getting file URL:", urlError);
+        // Keep original path if URL generation fails
+      }
+    }
+
     res.json({
       success: true,
       message: "User updated successfully",
       data: {
-        user,
+        user: userObj,
       },
     });
   } catch (error) {

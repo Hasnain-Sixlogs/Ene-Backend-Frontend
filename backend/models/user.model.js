@@ -55,9 +55,9 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
-    lord_accepted:{
+    lord_accepted: {
       type: String,
-      default: `No "I still have Questions"`
+      default: `No "I still have Questions"`,
     },
     otp: {
       type: Number,
@@ -86,8 +86,8 @@ const userSchema = new mongoose.Schema(
     },
     social_type: {
       type: String,
-      enum: ["google", "facebook", "apple"],
-      default: null,
+      enum: ["google", "facebook", "apple", "email"],
+      default: "email",
     },
     role: {
       type: String,
@@ -132,7 +132,6 @@ const userSchema = new mongoose.Schema(
 // Index for soft delete queries
 userSchema.index({ deleted_at: 1 });
 userSchema.index({ location: "2dsphere" });
-
 
 // Hash the password before saving the user document
 userSchema.pre("save", async function (next) {

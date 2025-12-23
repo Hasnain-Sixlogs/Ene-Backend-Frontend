@@ -77,14 +77,52 @@ export default function Users() {
     if (!selectedUser) return;
     
     try {
-      await updateUser(selectedUser._id, {
-        name: userData.name,
-        email: userData.email,
-        location: {
-          address: userData.location,
-          city: userData.city,
-        },
-      });
+      // Check if image file is included
+      const imageFile = userData._imageFile;
+      
+      if (imageFile) {
+        // Create FormData for file upload
+        const formData = new FormData();
+        formData.append('profile', imageFile); // Backend expects field name 'profile'
+        formData.append('folder', 'profiles'); // Tell multer which folder to use
+        formData.append('name', userData.name);
+        
+        // Send location as JSON string (backend will parse it)
+        if (userData.location || userData.city) {
+          formData.append('location', JSON.stringify({
+            address: userData.location || '',
+            city: userData.city || '',
+          }));
+        }
+        
+        console.log('Uploading image:', imageFile.name, imageFile.size, 'bytes');
+        console.log('FormData entries:');
+        for (const [key, value] of formData.entries()) {
+          console.log(key, value instanceof File ? `File: ${value.name}` : value);
+        }
+        
+        const response = await updateUser(selectedUser._id, formData);
+        console.log('Upload response:', response);
+        
+        // Update the selected user's image if response includes it
+        if (response?.data?.user?.profile) {
+          setSelectedUser({
+            ...selectedUser,
+            image: response.data.user.profile,
+          });
+        }
+      } else {
+        // Regular JSON update without image
+        await updateUser(selectedUser._id, {
+          name: userData.name,
+          email: userData.email,
+          location: {
+            address: userData.location,
+            city: userData.city,
+          },
+        });
+      }
+      
       toast({
         title: "Success",
         description: "User updated successfully",
@@ -92,6 +130,7 @@ export default function Users() {
       setIsModalOpen(false);
       fetchUsers(pagination.page, searchQuery);
     } catch (error) {
+      console.error('Error updating user:', error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to update user",

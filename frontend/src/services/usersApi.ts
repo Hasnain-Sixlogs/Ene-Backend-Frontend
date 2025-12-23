@@ -51,14 +51,19 @@ export const getUserById = async (id: string): Promise<UserDetailResponse> => {
 
 /**
  * Update user
+ * Supports both JSON data and FormData (for file uploads)
  */
 export const updateUser = async (
   id: string,
-  data: UpdateUserRequest
+  data: UpdateUserRequest | FormData
 ): Promise<UpdateUserResponse> => {
+  // If data is FormData, send as-is (for file uploads)
+  // Otherwise, stringify JSON data
+  const body = data instanceof FormData ? data : JSON.stringify(data);
+  
   const response = await authenticatedFetch(getApiUrl(API_ENDPOINTS.USERS.UPDATE(id)), {
     method: 'PUT',
-    body: JSON.stringify(data),
+    body,
   });
 
   if (!response.ok) {

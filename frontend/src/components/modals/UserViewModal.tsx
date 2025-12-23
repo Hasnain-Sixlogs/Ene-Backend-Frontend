@@ -8,8 +8,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { toast } from "@/hooks/use-toast";
+import { Upload, X } from "lucide-react";
 
 interface User {
   id?: number;
@@ -35,15 +36,65 @@ interface UserViewModalProps {
 
 export function UserViewModal({ user, isOpen, onClose, mode, onSave }: UserViewModalProps) {
   const [formData, setFormData] = useState<User | null>(user);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Update formData when user changes
   useEffect(() => {
     setFormData(user);
+    setImagePreview(user?.image || user?.avatar || null);
+    setSelectedImage(null);
   }, [user]);
+
+  // Handle image selection
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Invalid file type",
+          description: "Please select an image file",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Validate file size (10MB max)
+      if (file.size > 10 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Image size should be less than 10MB",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setSelectedImage(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Remove selected image
+  const handleRemoveImage = () => {
+    setSelectedImage(null);
+    setImagePreview(user?.image || user?.avatar || null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   const handleSave = () => {
     if (formData && onSave) {
-      onSave(formData);
+      // Pass both formData and selectedImage to onSave
+      onSave({ ...formData, _imageFile: selectedImage } as any);
     } else {
       toast({
         title: "Success",
@@ -65,13 +116,53 @@ export function UserViewModal({ user, isOpen, onClose, mode, onSave }: UserViewM
         </DialogHeader>
         
         <div className="space-y-6 py-4">
-          <div className="flex justify-center">
+          <div className="flex flex-col items-center gap-4">
             <Avatar className="w-24 h-24 border-4 border-muted">
-              <AvatarImage src={user.image || user.avatar || undefined} />
+              <AvatarImage src={imagePreview || undefined} />
               <AvatarFallback className="bg-muted text-muted-foreground text-3xl">
                 {user.name.charAt(0)}
               </AvatarFallback>
             </Avatar>
+            
+            {mode === "edit" && (
+              <div className="flex flex-col items-center gap-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageSelect}
+                  className="hidden"
+                  id="profile-image-upload"
+                />
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="gap-2"
+                  >
+                    <Upload className="w-4 h-4" />
+                    {selectedImage ? "Change Image" : "Upload Image"}
+                  </Button>
+                  {selectedImage && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleRemoveImage}
+                      className="gap-2 text-destructive hover:text-destructive"
+                    >
+                      <X className="w-4 h-4" />
+                      Remove
+                    </Button>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Max size: 10MB (JPG, PNG, etc.)
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="grid gap-4">
