@@ -3,73 +3,26 @@ const path = require('path');
 const fs = require('fs');
 const { Storage } = require('@google-cloud/storage');
 
-// Initialize GCS with error handling
+// Initialize GCS with Application Default Credentials (ADC)
 let storage = null;
 let bucket = null;
 const bucketName = process.env.GCS_BUCKET_NAME || 'ene-uploads';
 
 try {
-  // Try to load service account credentials
-  let credentials = null;
-  
-  // Option 1: Use credentials from environment variable as JSON string (MOST SECURE - for production)
-  if (process.env.GCP_SERVICE_ACCOUNT_JSON) {
-    try {
-      credentials = JSON.parse(process.env.GCP_SERVICE_ACCOUNT_JSON);
-      console.log('✅ Using GCS credentials from GCP_SERVICE_ACCOUNT_JSON environment variable');
-    } catch (err) {
-      console.warn('Failed to parse GCP_SERVICE_ACCOUNT_JSON:', err.message);
-    }
+  // Use Application Default Credentials (ADC)
+  // On Cloud Run: Uses the service account specified in --service-account
+  // Locally: Uses GOOGLE_APPLICATION_CREDENTIALS env var or gcloud auth
+  if (!process.env.GCP_PROJECT_ID) {
+    throw new Error('GCP_PROJECT_ID environment variable is required');
   }
+
+  storage = new Storage({
+    projectId: process.env.GCP_PROJECT_ID,
+    // No credentials specified - uses ADC automatically
+  });
   
-  // Option 2: Use credentials from file path (for Cloud Run secrets mount)
-  if (!credentials && process.env.GCP_SERVICE_ACCOUNT_KEY && fs.existsSync(process.env.GCP_SERVICE_ACCOUNT_KEY)) {
-    try {
-      credentials = JSON.parse(fs.readFileSync(process.env.GCP_SERVICE_ACCOUNT_KEY, 'utf8'));
-      console.log('✅ Using GCS credentials from file:', process.env.GCP_SERVICE_ACCOUNT_KEY);
-    } catch (err) {
-      console.warn('Failed to parse service account key from file:', err.message);
-    }
-  }
-  
-  // Option 3: Use local config file (ONLY for local development - NOT recommended for production)
-  if (!credentials) {
-    const keyPath = path.resolve(__dirname, '../config/gcp-service-account.json');
-    if (fs.existsSync(keyPath)) {
-      try {
-        credentials = JSON.parse(fs.readFileSync(keyPath, 'utf8'));
-        console.warn('⚠️  Using GCS credentials from local file (not recommended for production)');
-      } catch (err) {
-        console.warn('Failed to load service account key from config:', err.message);
-      }
-    }
-  }
-  
-  // Initialize Storage with credentials object (more reliable than keyFilename)
-  if (credentials) {
-    storage = new Storage({
-      projectId: process.env.GCP_PROJECT_ID || credentials.project_id,
-      credentials: credentials,
-    });
-    bucket = storage.bucket(bucketName);
-    console.log('✅ GCS initialized successfully');
-  } else if (process.env.GCP_PROJECT_ID) {
-    // Option 4: Try Application Default Credentials (for Cloud Run with service account)
-    try {
-      storage = new Storage({
-        projectId: process.env.GCP_PROJECT_ID,
-      });
-      bucket = storage.bucket(bucketName);
-      console.log('✅ GCS initialized with Application Default Credentials');
-    } catch (adcError) {
-      console.warn('Application Default Credentials not available:', adcError.message);
-      throw adcError; // Re-throw to be caught by outer catch
-    }
-  } else {
-    console.warn('⚠️  GCS credentials not found. GCS uploads will be disabled.');
-    console.warn('   Set GCP_SERVICE_ACCOUNT_JSON (recommended) or GCP_SERVICE_ACCOUNT_KEY environment variable');
-    throw new Error('GCS credentials not available');
-  }
+  bucket = storage.bucket(bucketName);
+  console.log('✅ GCS initialized with Application Default Credentials');
 } catch (error) {
   console.warn('GCS initialization failed, will use local storage:', error.message);
   console.warn('Error details:', error.code, error.message);
