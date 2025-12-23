@@ -172,7 +172,7 @@ try {
     console.log(`✅ Socket.IO is ready for real-time connections`);
     console.log(`✅ Swagger documentation available at https://ene-backend-454164503170.us-south1.run.app/api-docs`);
     console.log(`✅ MongoDB connection status: ${mongoose.connection.readyState === 1 ? 'Connected' : 'Connecting...'}`);
-    console.log('=== Server Started Successfully :) ===');
+    console.log('=== Server Started Successfully ===');
   });
 
   server.on('error', (error) => {
