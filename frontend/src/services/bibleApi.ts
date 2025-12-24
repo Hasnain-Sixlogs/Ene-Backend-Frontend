@@ -4,7 +4,7 @@
 // TODO: Move API_KEY to environment variable for better security
 // Create .env file with: VITE_DBT_API_KEY=your_api_key_here
 
-const API_BASE_URL = 'https://4.dbt.io/api';
+const API_BASE_URL = import.meta.env.VITE_DBT_API_BASE_URL || 'https://4.dbt.io/api';
 const API_KEY = import.meta.env.VITE_DBT_API_KEY || '851b4b78-fcf6-47fc-89c7-4e8d11446e26';
 const API_VERSION = '4';
 

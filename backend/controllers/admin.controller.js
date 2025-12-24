@@ -829,8 +829,16 @@ const updateUser = async (req, res) => {
     // Handle profile image upload
     if (req.file) {
       try {
-        console.log("File received:", req.file.originalname, req.file.size, "bytes");
-        const profileImagePath = await processUploadedFile(req.file, 'profiles');
+        console.log(
+          "File received:",
+          req.file.originalname,
+          req.file.size,
+          "bytes"
+        );
+        const profileImagePath = await processUploadedFile(
+          req.file,
+          "profiles"
+        );
         console.log("Profile image path:", profileImagePath);
         if (profileImagePath) {
           updateData.profile = profileImagePath;
@@ -840,7 +848,10 @@ const updateUser = async (req, res) => {
         return res.status(500).json({
           success: false,
           message: "Error uploading profile image",
-          error: process.env.NODE_ENV === "development" ? uploadError.message : undefined,
+          error:
+            process.env.NODE_ENV === "development"
+              ? uploadError.message
+              : undefined,
         });
       }
     } else {
@@ -852,7 +863,7 @@ const updateUser = async (req, res) => {
     if (updateData.location) {
       // Parse location if it comes as JSON string (from FormData)
       let locationData = updateData.location;
-      if (typeof locationData === 'string') {
+      if (typeof locationData === "string") {
         try {
           locationData = JSON.parse(locationData);
         } catch (parseError) {
@@ -860,7 +871,7 @@ const updateUser = async (req, res) => {
           locationData = {};
         }
       }
-      
+
       // Get existing user to preserve coordinates if not provided
       const existingUser = await User.findById(id).select("location");
       const existingLocation = existingUser?.location?.toObject() || {};
@@ -901,7 +912,7 @@ const updateUser = async (req, res) => {
     }
 
     // Convert profile image path to URL if needed (for GCS or local)
-    const { getFileUrl } = require('../utils/fileUpload');
+    const { getFileUrl } = require("../utils/fileUpload");
     let userObj = user.toObject();
     if (userObj.profile) {
       try {
@@ -1542,7 +1553,7 @@ const getChurchStats = async (req, res) => {
   try {
     // Total churches (approved only)
     const totalChurches = await Church.countDocuments({
-      approve_status: 2, // approved
+      // approve_status: 2, // approved
     });
 
     // Total members (users associated with churches)
@@ -1554,9 +1565,9 @@ const getChurchStats = async (req, res) => {
 
     // Active churches (approved and available)
     const activeChurches = await Church.countDocuments({
-      approve_status: 2, // approved
+      // approve_status: 2, // approved
       church_status: 1, // active
-      is_availability: 1, // available
+      // is_availability: 1, // available
     });
 
     res.json({
@@ -1786,11 +1797,19 @@ const updateChurchAdmin = async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
-
+    // console.log(updateData);
     // Don't allow updating sensitive fields
     delete updateData._id;
     delete updateData.user_id;
 
+    updateData.location = {
+      address: updateData.location.address,
+      city: updateData.location.city,
+      type: "Point",
+      coordinates: updateData.location.coordinates,
+    };
+
+    console.log(updateData);
     const church = await Church.findByIdAndUpdate(id, updateData, {
       new: true,
       runValidators: true,
@@ -1815,6 +1834,82 @@ const updateChurchAdmin = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Error updating church",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
+  }
+};
+
+/**
+ * Create church (admin)
+ * POST /api/v2/admin/churches
+ */
+const createChurchAdmin = async (req, res) => {
+  try {
+    const { name, location, place_id } = req.body;
+    const adminId = req.user?.id || req.user?._id;
+
+    // Validation
+    if (!name || !location) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide all required fields (name, location)",
+      });
+    }
+
+    // Validate location structure
+    if (!location.address || !location.city || !location.coordinates) {
+      return res.status(400).json({
+        success: false,
+        message: "Location must include address, city, and coordinates",
+      });
+    }
+
+    // Validate coordinates
+    if (
+      !Array.isArray(location.coordinates) ||
+      location.coordinates.length !== 2
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Coordinates must be an array of [longitude, latitude]",
+      });
+    }
+
+    // Create church with admin approval (approved by default)
+    const church = new Church({
+      user_id: adminId, // Admin user_id or null
+      name,
+      location: {
+        address: location.address,
+        city: location.city,
+        type: "Point",
+        coordinates: location.coordinates, // [longitude, latitude]
+      },
+      place_id: place_id || null,
+      approve_status: 2, // 2: approved (admin-created churches are auto-approved)
+      church_status: 1, // Active by default
+      is_availability: 1, // Available by default
+    });
+
+    await church.save();
+
+    // Populate user reference if exists
+    if (church.user_id) {
+      await church.populate("user_id", "name email mobile");
+    }
+
+    res.status(201).json({
+      success: true,
+      message: "Church created successfully",
+      data: {
+        church,
+      },
+    });
+  } catch (error) {
+    console.error("Create church admin error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error creating church",
       error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
@@ -2235,6 +2330,7 @@ module.exports = {
   getChurchStats,
   getAllChurchesAdmin,
   getChurchByIdAdmin,
+  createChurchAdmin,
   updateChurchAdmin,
   deleteChurchAdmin,
   // Prayer Requests Management

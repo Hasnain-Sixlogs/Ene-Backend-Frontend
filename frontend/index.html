@@ -16,6 +16,23 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@EveryNation" />
     <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    
+    <!-- Prevent flash of wrong theme -->
+    <script>
+      (function() {
+        const getStoredTheme = () => localStorage.getItem('theme');
+        const getSystemTheme = () => window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        
+        const theme = getStoredTheme() || 'system';
+        const resolvedTheme = theme === 'system' ? getSystemTheme() : theme;
+        
+        if (resolvedTheme === 'dark') {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      })();
+    </script>
   </head>
 
   <body>

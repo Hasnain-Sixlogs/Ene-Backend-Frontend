@@ -110,3 +110,21 @@ export interface ChurchesListParams {
   sortOrder?: 'asc' | 'desc';
 }
 
+export interface CreateChurchRequest {
+  name: string;
+  location: {
+    address: string;
+    city: string;
+    coordinates: [number, number]; // [longitude, latitude]
+  };
+  place_id?: string;
+}
+
+export interface CreateChurchResponse {
+  success: boolean;
+  message: string;
+  data: {
+    church: ChurchData;
+  };
+}
+

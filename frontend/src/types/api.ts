@@ -11,6 +11,7 @@ export interface Admin {
   name: string;
   email: string;
   role: string;
+  profile?: string;
   createdAt: string;
   updatedAt: string;
 }

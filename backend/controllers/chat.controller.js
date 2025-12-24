@@ -33,7 +33,16 @@ const getConversations = async (req, res) => {
             lastMessage: { $first: '$$ROOT' },
             unreadCount: {
               $sum: {
-                $cond: [{ $eq: ['$is_read', false] }, 1, 0],
+                $cond: [
+                  {
+                    $and: [
+                      { $eq: ['$is_read', false] },
+                      { $eq: ['$sender_role', 'user'] }, // Only count messages sent by users (not by admin)
+                    ],
+                  },
+                  1,
+                  0,
+                ],
               },
             },
           },

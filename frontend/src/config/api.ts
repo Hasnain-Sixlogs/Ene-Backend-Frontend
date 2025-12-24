@@ -70,6 +70,7 @@ export const API_ENDPOINTS = {
   CHURCHES: {
     STATS: '/api/v2/admin/churches/stats', // GET - Get church statistics
     LIST: '/api/v2/admin/churches', // GET - Get all churches
+    CREATE: '/api/v2/admin/churches', // POST - Create church (admin only)
     BY_ID: (id: string) => `/api/v2/admin/churches/${id}`, // GET - Get church by ID
     UPDATE: (id: string) => `/api/v2/admin/churches/${id}`, // PUT - Update church
     DELETE: (id: string) => `/api/v2/admin/churches/${id}`, // DELETE - Delete church
@@ -106,6 +107,13 @@ export const API_ENDPOINTS = {
     LIST: '/api/v2/videos', // GET - Get all published videos
     BY_ID: (id: string) => `/api/v2/videos/${id}`, // GET - Get published video by ID
     INCREMENT_VIEW: (id: string) => `/api/v2/videos/${id}/view`, // POST - Increment video view count
+  },
+  // Settings endpoints (Admin)
+  SETTINGS: {
+    GET: '/api/v2/admin/settings', // GET - Get current user settings
+    UPDATE_PROFILE: '/api/v2/admin/settings/profile', // PUT - Update profile information
+    UPDATE_SECURITY: '/api/v2/admin/settings/security', // PUT - Update security settings
+    UPDATE_APPEARANCE: '/api/v2/admin/settings/appearance', // PUT - Update appearance settings
   },
 } as const;
 

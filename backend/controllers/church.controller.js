@@ -79,9 +79,9 @@ const getAllChurches = async (req, res) => {
       sortOrder = "desc",
     } = req.query;
 
-    // Build filter object - only get churches belonging to the user
+    // Build filter object - show all churches (no user filtering)
     const filter = {
-      user_id: userId || null,
+      church_status: 1,
     };
 
     // Optional filter by approval status

@@ -20,8 +20,11 @@ import {
   getChurchById,
   updateChurch,
   deleteChurch,
+  createChurch,
 } from "@/services/churchesApi";
-import type { Church, UpdateChurchRequest } from "@/types/churches";
+import type { Church, UpdateChurchRequest, CreateChurchRequest } from "@/types/churches";
+import { GoogleMapPicker } from "@/components/GoogleMapPicker";
+import { Plus } from "lucide-react";
 
 export default function ChurchManagement() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -32,7 +35,15 @@ export default function ChurchManagement() {
   const [isLoading, setIsLoading] = useState(true);
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isAddOpen, setIsAddOpen] = useState(false);
   const [selectedChurch, setSelectedChurch] = useState<Church | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<{
+    name: string;
+    address: string;
+    city: string;
+    coordinates: [number, number];
+    place_id?: string;
+  } | null>(null);
   
   // Form state
   const [formData, setFormData] = useState<UpdateChurchRequest>({
@@ -44,6 +55,16 @@ export default function ChurchManagement() {
     church_status: 1,
     is_availability: 1,
     approve_status: 2,
+  });
+
+  // Add church form state
+  const [addFormData, setAddFormData] = useState<CreateChurchRequest>({
+    name: "",
+    location: {
+      address: "",
+      city: "",
+      coordinates: [0, 0],
+    },
   });
 
   const fetchData = useCallback(async (page: number = 1, search?: string, status?: string) => {
@@ -179,6 +200,74 @@ export default function ChurchManagement() {
     setSelectedChurch(null);
   };
 
+  const resetAddForm = () => {
+    setAddFormData({
+      name: "",
+      location: {
+        address: "",
+        city: "",
+        coordinates: [0, 0],
+      },
+    });
+    setSelectedLocation(null);
+  };
+
+  const handleLocationSelect = (location: {
+    name: string;
+    address: string;
+    city: string;
+    coordinates: [number, number];
+    place_id?: string;
+  }) => {
+    setSelectedLocation(location);
+    setAddFormData({
+      name: location.name,
+      location: {
+        address: location.address,
+        city: location.city,
+        coordinates: location.coordinates,
+      },
+      place_id: location.place_id,
+    });
+  };
+
+  const handleCreate = async () => {
+    if (!addFormData.name.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a church name",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!addFormData.location.coordinates || addFormData.location.coordinates[0] === 0) {
+      toast({
+        title: "Error",
+        description: "Please select a location on the map",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await createChurch(addFormData);
+      toast({
+        title: "Success",
+        description: "Church created successfully",
+      });
+      setIsAddOpen(false);
+      resetAddForm();
+      fetchData(pagination.page, searchTerm, statusFilter);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to create church",
+        variant: "destructive",
+      });
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case "active": return "bg-green-100 text-green-700";
@@ -199,6 +288,10 @@ export default function ChurchManagement() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-foreground">Church Management</h1>
+          <Button onClick={() => setIsAddOpen(true)} className="bg-accent hover:bg-accent/90">
+            <Plus className="w-4 h-4 mr-2" />
+            Add Church
+          </Button>
         </div>
 
         {/* Stats Cards */}
@@ -287,10 +380,10 @@ export default function ChurchManagement() {
                   <tr className="bg-primary text-primary-foreground">
                     <th className="text-left p-4 font-semibold text-sm uppercase tracking-wider rounded-tl-lg">S.No</th>
                     <th className="text-left p-4 font-semibold text-sm uppercase tracking-wider">Church Name</th>
-                    <th className="text-left p-4 font-semibold text-sm uppercase tracking-wider">User Name</th>
+                    {/* <th className="text-left p-4 font-semibold text-sm uppercase tracking-wider">User Name</th> */}
                     <th className="text-left p-4 font-semibold text-sm uppercase tracking-wider">Location</th>
-                    <th className="text-left p-4 font-semibold text-sm uppercase tracking-wider">Members</th>
-                    <th className="text-left p-4 font-semibold text-sm uppercase tracking-wider">Phone</th>
+                    {/* <th className="text-left p-4 font-semibold text-sm uppercase tracking-wider">Members</th> */}
+                    {/* <th className="text-left p-4 font-semibold text-sm uppercase tracking-wider">Phone</th> */}
                     <th className="text-left p-4 font-semibold text-sm uppercase tracking-wider">Status</th>
                     <th className="text-left p-4 font-semibold text-sm uppercase tracking-wider rounded-tr-lg">Actions</th>
                   </tr>
@@ -307,12 +400,12 @@ export default function ChurchManagement() {
                       <tr key={church._id} className="border-b border-border hover:bg-muted/50 transition-colors">
                         <td className="p-4 text-muted-foreground">{church.sno || ((pagination.page - 1) * pagination.limit) + index + 1}</td>
                         <td className="p-4 font-medium text-foreground">{church.churchName}</td>
-                        <td className="p-4 text-muted-foreground">{church?.user_id?.name}</td>
+                        {/* <td className="p-4 text-muted-foreground">{church?.user_id?.name}</td> */}
                         <td className="p-4 text-muted-foreground max-w-xs">
                           <span className="line-clamp-1">{church.location}</span>
                         </td>
-                        <td className="p-4 text-muted-foreground">{church.members || 0}</td>
-                        <td className="p-4 text-muted-foreground">{church.phone || 'N/A'}</td>
+                        {/* <td className="p-4 text-muted-foreground">{church.members || 0}</td> */}
+                        {/* <td className="p-4 text-muted-foreground">{church.phone || 'N/A'}</td> */}
                         <td className="p-4">
                           <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(getStatusText(church))}`}>
                             {getStatusText(church)}
@@ -444,6 +537,86 @@ export default function ChurchManagement() {
                 )}
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Church Dialog */}
+        <Dialog open={isAddOpen} onOpenChange={(open) => {
+          setIsAddOpen(open);
+          if (!open) resetAddForm();
+        }}>
+          <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Add New Church</DialogTitle>
+              <DialogDescription>
+                Search and select a location on the map to add a new church
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Church Name</Label>
+                <Input
+                  placeholder="e.g., Grace Community Church"
+                  value={addFormData.name}
+                  onChange={(e) => setAddFormData({ ...addFormData, name: e.target.value })}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Location</Label>
+                <GoogleMapPicker
+                  onLocationSelect={handleLocationSelect}
+                  onMarkerClick={(marker) => {
+                    // When clicking on a Google Places church marker, populate the form
+                    setAddFormData({
+                      name: marker.name,
+                      location: {
+                        address: marker.address,
+                        city: marker.city,
+                        coordinates: marker.coordinates,
+                      },
+                      place_id: marker.place_id,
+                    });
+                    setSelectedLocation({
+                      name: marker.name,
+                      address: marker.address,
+                      city: marker.city,
+                      coordinates: marker.coordinates,
+                      place_id: marker.place_id,
+                    });
+                  }}
+                  height="400px"
+                />
+              </div>
+
+              {selectedLocation && (
+                <div className="p-4 bg-muted rounded-lg space-y-2">
+                  <p className="text-sm font-medium">Selected Location:</p>
+                  <p className="text-sm text-muted-foreground">
+                    <strong>Name:</strong> {selectedLocation.name}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    <strong>Address:</strong> {selectedLocation.address}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    <strong>City:</strong> {selectedLocation.city}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    <strong>Coordinates:</strong> {selectedLocation.coordinates[1].toFixed(6)}, {selectedLocation.coordinates[0].toFixed(6)}
+                  </p>
+                </div>
+              )}
+
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => {
+                  setIsAddOpen(false);
+                  resetAddForm();
+                }}>Cancel</Button>
+                <Button className="bg-accent hover:bg-accent/90" onClick={handleCreate}>
+                  Create Church
+                </Button>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
 

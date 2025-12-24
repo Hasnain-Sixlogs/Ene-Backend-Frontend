@@ -30,7 +30,9 @@ export default function UserChat() {
   const [onlineStatuses, setOnlineStatuses] = useState<Map<string, 'online' | 'offline'>>(new Map());
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollViewportRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const shouldAutoScrollRef = useRef<boolean>(true);
   const session = getSession();
   const currentUserId = session?.user?.id || '';
 
@@ -48,10 +50,22 @@ export default function UserChat() {
       if (otherUserId && (message.user_id === otherUserId || message.admin_id === otherUserId)) {
         // Add message to current conversation
         setMessages(prev => {
-          // Check if message already exists
-          if (prev.some(m => m._id === message._id)) {
-            return prev;
+          // Check if message already exists (by ID or by temp ID matching)
+          const existingIndex = prev.findIndex(m => 
+            m._id === message._id || 
+            (m._id.startsWith('temp-') && m.message === message.message && m.sender_id._id === currentUserId)
+          );
+          
+          if (existingIndex !== -1) {
+            // Replace optimistic message with real message
+            const newMessages = [...prev];
+            newMessages[existingIndex] = message;
+            return newMessages.sort((a, b) => 
+              new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+            );
           }
+          
+          // Add new message if it doesn't exist
           return [...prev, message].sort((a, b) => 
             new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
           );
@@ -63,6 +77,13 @@ export default function UserChat() {
         // Mark as read if user is viewing the conversation
         if (message.sender_id._id !== currentUserId) {
           markAsReadSocket({ userId: otherUserId });
+        }
+        
+        // Auto-scroll if user is at bottom
+        if (shouldAutoScrollRef.current) {
+          setTimeout(() => {
+            scrollToBottom(true);
+          }, 100);
         }
       } else {
         // Update conversation list if message is from another conversation
@@ -189,6 +210,7 @@ export default function UserChat() {
   // Handle conversation selection
   const handleSelectConversation = (conversation: Conversation) => {
     setSelectedConversation(conversation);
+    shouldAutoScrollRef.current = true; // Reset auto-scroll when selecting new conversation
     const otherUserId = getOtherUserId(conversation);
     if (otherUserId) {
       // Join room
@@ -209,19 +231,59 @@ export default function UserChat() {
     const otherUserId = getOtherUserId(selectedConversation);
     if (!otherUserId) return;
 
-    // Send via socket
-    sendSocketMessage({
-      userId: otherUserId,
-      message: newMessage.trim(),
-    });
+    const messageText = newMessage.trim();
+    const tempId = `temp-${Date.now()}-${Math.random()}`;
+    const currentUserRole = session?.user?.role || 'user';
 
+    // Optimistic update - add message immediately to UI
+    const optimisticMessage: Message = {
+      _id: tempId,
+      user_id: currentUserRole === 'admin' ? otherUserId : currentUserId,
+      admin_id: currentUserRole === 'admin' ? currentUserId : otherUserId,
+      message: messageText,
+      sender_id: {
+        _id: currentUserId,
+        name: session?.user?.name || 'You',
+        email: session?.user?.email || '',
+        profile: session?.user?.profile || undefined,
+      },
+      sender_role: currentUserRole as 'user' | 'admin',
+      is_read: false,
+      read_at: null,
+      attachment: null,
+      attachment_type: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    // Add optimistic message to state
+    setMessages(prev => [...prev, optimisticMessage].sort((a, b) => 
+      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    ));
+
+    // Update conversation's last message optimistically
+    updateConversationLastMessage(optimisticMessage);
+
+    // Clear input
     setNewMessage("");
     setIsTyping(false);
+    shouldAutoScrollRef.current = true; // Auto-scroll when sending message
     
     // Clear typing timeout
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
+
+    // Send via socket
+    sendSocketMessage({
+      userId: otherUserId,
+      message: messageText,
+    });
+
+    // Auto-scroll after adding optimistic message
+    setTimeout(() => {
+      scrollToBottom(true);
+    }, 50);
   };
 
   // Handle typing
@@ -249,10 +311,62 @@ export default function UserChat() {
     }, 1000);
   };
 
-  // Scroll to bottom when messages change
+  // Scroll to bottom function
+  const scrollToBottom = useCallback((force: boolean = false) => {
+    if (force || shouldAutoScrollRef.current) {
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
+  }, []);
+
+  // Handle scroll event to detect manual scrolling
+  const handleScroll = useCallback(() => {
+    if (!scrollViewportRef.current) return;
+    
+    const viewport = scrollViewportRef.current;
+    const scrollTop = viewport.scrollTop;
+    const scrollHeight = viewport.scrollHeight;
+    const clientHeight = viewport.clientHeight;
+    
+    // Check if user is near the bottom (within 100px)
+    const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+    
+    // If user scrolls up manually, disable auto-scroll
+    // If user scrolls back to bottom, enable auto-scroll
+    shouldAutoScrollRef.current = isNearBottom;
+  }, []);
+
+  // Set up scroll listener
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    const viewport = scrollViewportRef.current;
+    if (viewport) {
+      viewport.addEventListener('scroll', handleScroll, { passive: true });
+      return () => {
+        viewport.removeEventListener('scroll', handleScroll);
+      };
+    }
+  }, [handleScroll, selectedConversation]);
+
+  // Scroll to bottom when conversation is first opened
+  useEffect(() => {
+    if (selectedConversation && !isLoadingMessages && messages.length > 0) {
+      // Always scroll to bottom when conversation is first opened
+      scrollToBottom(true);
+    }
+  }, [selectedConversation, isLoadingMessages, scrollToBottom]);
+
+  // Scroll to bottom when new messages arrive (only if user is at bottom)
+  const lastMessageIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage._id !== lastMessageIdRef.current && shouldAutoScrollRef.current) {
+        lastMessageIdRef.current = lastMessage._id;
+        scrollToBottom();
+      }
+    }
+  }, [messages, scrollToBottom]);
 
   // Join room when conversation is selected and socket is connected
   useEffect(() => {
@@ -354,7 +468,7 @@ export default function UserChat() {
               <div>
                 <p className="text-sm text-muted-foreground">Online Users</p>
                 <p className="text-2xl font-bold text-foreground">
-                  {stats.onlineUsers || Array.from(onlineStatuses.values()).filter(s => s === 'online').length}
+                  {stats.onlineUsers || 0}
                 </p>
               </div>
             </div>
@@ -367,7 +481,7 @@ export default function UserChat() {
               <div>
                 <p className="text-sm text-muted-foreground">Unread Messages</p>
                 <p className="text-2xl font-bold text-foreground">
-                  {stats.unreadMessages || conversations.reduce((acc, c) => acc + (c.unreadCount || 0), 0)}
+                  {stats.unreadMessages || 0}
                 </p>
               </div>
             </div>
@@ -498,7 +612,18 @@ export default function UserChat() {
 
                   {/* Messages */}
                   <ScrollArea className="flex-1 min-h-0">
-                    <div className="p-4 space-y-4">
+                    <div 
+                      className="p-4 space-y-4"
+                      ref={(node) => {
+                        if (node) {
+                          // Find the viewport element from Radix ScrollArea
+                          const viewport = node.closest('[data-radix-scroll-area-root]')?.querySelector('[data-radix-scroll-area-viewport]') as HTMLDivElement;
+                          if (viewport) {
+                            scrollViewportRef.current = viewport;
+                          }
+                        }
+                      }}
+                    >
                       {isLoadingMessages ? (
                         <div className="flex items-center justify-center h-full min-h-[200px]">
                           <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />

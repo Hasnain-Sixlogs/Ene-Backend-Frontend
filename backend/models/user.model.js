@@ -123,6 +123,31 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    bio: {
+      type: String,
+      default: null,
+    },
+    two_factor_auth: {
+      type: Boolean,
+      default: false,
+    },
+    login_alerts: {
+      type: Boolean,
+      default: true,
+    },
+    theme: {
+      type: String,
+      enum: ["light", "dark", "system"],
+      default: "light",
+    },
+    compact_mode: {
+      type: Boolean,
+      default: false,
+    },
+    animations: {
+      type: Boolean,
+      default: true,
+    },
   },
   {
     timestamps: true,

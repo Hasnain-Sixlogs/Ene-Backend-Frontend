@@ -19,6 +19,7 @@ export interface User {
   email: string;
   name?: string;
   role?: string;
+  profile?: string;
   created_at: string;
 }
 
@@ -87,7 +88,7 @@ export const authenticatedFetch = async (
   url: string,
   options: RequestInit = {}
 ): Promise<Response> => {
-  let token = getAccessToken();
+  const token = getAccessToken();
   
   const headers = new Headers(options.headers);
   if (token) {
@@ -220,6 +221,7 @@ export const signIn = async (email: string, password: string): Promise<{ error: 
         email: admin.email,
         name: admin.name,
         role: admin.role,
+        profile: admin.profile,
         created_at: admin.createdAt,
       },
       access_token: loginResponse.data.accessToken,
@@ -254,6 +256,7 @@ export const signUp = async (email: string, password: string): Promise<{ error: 
       created_at: new Date().toISOString(),
     },
     access_token: 'mock_token_' + Date.now(),
+    refresh_token: 'mock_refresh_token_' + Date.now(),
     expires_at: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
   };
   
@@ -398,6 +401,7 @@ export const getCurrentUser = async (): Promise<{ user: User | null; error: Erro
       email: admin.email,
       name: admin.name,
       role: admin.role,
+      profile: admin.profile,
       created_at: admin.createdAt,
     };
 
@@ -418,6 +422,11 @@ export const getCurrentUser = async (): Promise<{ user: User | null; error: Erro
       : 'Network error. Please check your connection.';
     return { user: null, error: new Error(errorMessage) };
   }
+};
+
+// Refresh user data in session (useful after profile updates)
+export const refreshUser = async (): Promise<{ user: User | null; error: Error | null }> => {
+  return getCurrentUser();
 };
 
 // Listen for auth state changes (simplified version)

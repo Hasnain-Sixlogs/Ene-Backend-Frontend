@@ -4,7 +4,8 @@ const churchSchema = new mongoose.Schema({
   user_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: false, // Made optional for admin-created churches
+    default: null
   },
   name: {
     type: String,

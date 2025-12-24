@@ -43,6 +43,7 @@ router.delete('/follow-up-requests/:id', authenticateAdmin, adminController.dele
 // Church Management routes
 router.get('/churches/stats', authenticateAdmin, adminController.getChurchStats);
 router.get('/churches', authenticateAdmin, adminController.getAllChurchesAdmin);
+router.post('/churches', authenticateAdmin, adminController.createChurchAdmin);
 router.get('/churches/:id', authenticateAdmin, adminController.getChurchByIdAdmin);
 router.put('/churches/:id', authenticateAdmin, adminController.updateChurchAdmin);
 router.delete('/churches/:id', authenticateAdmin, adminController.deleteChurchAdmin);

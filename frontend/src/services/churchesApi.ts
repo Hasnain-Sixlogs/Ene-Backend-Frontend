@@ -8,6 +8,8 @@ import type {
   ChurchStatsResponse,
   UpdateChurchRequest,
   UpdateChurchResponse,
+  CreateChurchRequest,
+  CreateChurchResponse,
   ChurchesListParams,
 } from '@/types/churches';
 
@@ -84,6 +86,25 @@ export const updateChurch = async (
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.message || 'Failed to update church');
+  }
+
+  return response.json();
+};
+
+/**
+ * Create a church (admin only)
+ */
+export const createChurch = async (
+  churchData: CreateChurchRequest
+): Promise<CreateChurchResponse> => {
+  const response = await authenticatedFetch(getApiUrl(API_ENDPOINTS.CHURCHES.CREATE), {
+    method: 'POST',
+    body: JSON.stringify(churchData),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to create church');
   }
 
   return response.json();

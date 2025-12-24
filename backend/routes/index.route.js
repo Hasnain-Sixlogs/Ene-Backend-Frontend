@@ -10,6 +10,7 @@ const churchRoutes = require('./church.route');
 const noteRoutes = require('./note.route');
 const chatRoutes = require('./chat.route');
 const videoRoutes = require('./video.route');
+const settingsRoutes = require('./settings.route');
 
 // Mount routes
 router.use('/auth', authRoutes);
@@ -20,6 +21,7 @@ router.use('/churches', churchRoutes);
 router.use('/notes', noteRoutes);
 router.use('/chat', chatRoutes);
 router.use('/videos', videoRoutes);
+router.use('/admin/settings', settingsRoutes);
 
 // Default route
 router.get('/', (req, res) => {

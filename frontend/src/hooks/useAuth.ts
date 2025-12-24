@@ -62,6 +62,21 @@ export function useAuth() {
     return { error };
   };
 
+  const refreshUserData = async () => {
+    const { user: updatedUser, error } = await authService.refreshUser();
+    if (!error && updatedUser) {
+      setUser(updatedUser);
+      const currentSession = authService.getSession();
+      if (currentSession) {
+        setSession({
+          ...currentSession,
+          user: updatedUser,
+        });
+      }
+    }
+    return { user: updatedUser, error };
+  };
+
   return {
     user,
     session,
@@ -71,5 +86,6 @@ export function useAuth() {
     signOut,
     resetPassword,
     updatePassword,
+    refreshUserData,
   };
 }
