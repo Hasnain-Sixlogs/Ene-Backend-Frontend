@@ -24,5 +24,7 @@ router.put('/accept-lord', authenticate, authController.acceptLord);
 
 router.put('/update-profile', authenticate, uploadFile('profile'), authController.updateProfile);
 
+router.get('/get-admin', authenticate, authController.getAdmin);
+
 module.exports = router;
 

@@ -712,7 +712,7 @@ const updateProfile = async (req, res) => {
         message: "Unauthorized",
       });
     }
-    
+
     // Don't allow updating sensitive fields
     delete rest.password;
     delete rest.role;
@@ -721,11 +721,14 @@ const updateProfile = async (req, res) => {
     delete rest.email;
     delete rest.mobile;
     delete rest.country_code;
-    
+
     // Handle profile image upload
     if (req.file) {
       try {
-        const profileImagePath = await processUploadedFile(req.file, 'profiles');
+        const profileImagePath = await processUploadedFile(
+          req.file,
+          "profiles"
+        );
         if (profileImagePath) {
           rest.profile = profileImagePath;
         }
@@ -734,29 +737,35 @@ const updateProfile = async (req, res) => {
         return res.status(500).json({
           success: false,
           message: "Error uploading profile image",
-          error: process.env.NODE_ENV === "development" ? uploadError.message : undefined,
+          error:
+            process.env.NODE_ENV === "development"
+              ? uploadError.message
+              : undefined,
         });
       }
     }
-    
+
     // Handle location update - ensure proper GeoJSON format
     if (rest.location) {
       const existingUser = await User.findById(userId).select("location");
       const existingLocation = existingUser?.location?.toObject() || {};
-      
+
       const { address, city, lat, lng, coordinates } = rest.location;
-      
+
       // Build location object with proper GeoJSON format
       rest.location = {
-        address: address !== undefined ? address : (existingLocation.address || null),
-        city: city !== undefined ? city : (existingLocation.city || null),
+        address:
+          address !== undefined ? address : existingLocation.address || null,
+        city: city !== undefined ? city : existingLocation.city || null,
         type: "Point",
-        coordinates: coordinates || 
-          (lng !== undefined && lat !== undefined ? [Number(lng), Number(lat)] : 
-          (existingLocation.coordinates || [0, 0]))
+        coordinates:
+          coordinates ||
+          (lng !== undefined && lat !== undefined
+            ? [Number(lng), Number(lat)]
+            : existingLocation.coordinates || [0, 0]),
       };
     }
-    
+
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({
@@ -764,7 +773,10 @@ const updateProfile = async (req, res) => {
         message: "User not found",
       });
     }
-    const updatedUser = await User.findByIdAndUpdate(userId, rest, { new: true, runValidators: true });
+    const updatedUser = await User.findByIdAndUpdate(userId, rest, {
+      new: true,
+      runValidators: true,
+    });
     if (!updatedUser) {
       return res.status(404).json({
         success: false,
@@ -798,6 +810,34 @@ const updateProfile = async (req, res) => {
     });
   }
 };
+
+const getAdmin = async (req, res) => {
+  try {
+    const admin = await User.findOne({ role: "admin", deleted_at: null })
+      .select("-password -otp -refresh_token")
+      .sort({ createdAt: -1 })
+      .limit(1);
+    if (!admin) {
+      return res.status(404).json({
+        success: false,
+        message: "Admin not found",
+      });
+    }
+   
+    return res.json({
+      success: true,
+      message: "Admin found",
+      data: admin.toObject(),
+    });
+  } catch (error) {
+    console.error("Get admin error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error getting admin",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
+  }
+};
 module.exports = {
   signup,
   signin,
@@ -809,4 +849,5 @@ module.exports = {
   setLanguage,
   acceptLord,
   updateProfile,
+  getAdmin,
 };
