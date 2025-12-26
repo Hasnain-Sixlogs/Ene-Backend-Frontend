@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Chat = require('../models/chat.model');
 const User = require('../models/user.model');
+const { getFileUrl } = require('../utils/fileUpload');
 
 /**
  * Get all conversations for a user (user or admin)
@@ -140,11 +141,37 @@ const getConversations = async (req, res) => {
       ]);
     }
 
+    // Convert profile image paths to signed URLs
+    const conversationsWithUrls = await Promise.all(
+      conversations.map(async (conv) => {
+        console.log("Conversation:", conv);
+        if (conv.userProfile) {
+          try {
+            conv.userProfile = await getFileUrl(conv.userProfile);
+            console.log("User profile URL:", conv.userProfile);
+          } catch (urlError) {
+            console.error("Error getting file URL:", urlError);
+            // Keep original path if URL generation fails
+          }
+        }
+        if (conv.adminProfile) {
+          try {
+            conv.adminProfile = await getFileUrl(conv.adminProfile);
+            console.log("Admin profile URL:", conv.adminProfile);
+          } catch (urlError) {
+            console.error("Error getting file URL:", urlError);
+            // Keep original path if URL generation fails
+          }
+        }
+        return conv;
+      })
+    );
+
     res.json({
       success: true,
       message: 'Conversations retrieved successfully',
       data: {
-        conversations,
+        conversations: conversationsWithUrls,
       },
     });
   } catch (error) {
@@ -224,8 +251,23 @@ const getMessages = async (req, res) => {
       deleted_at: null,
     });
 
+    // Convert profile image paths to signed URLs
+    const messagesWithUrls = await Promise.all(
+      messages.map(async (msg) => {
+        if (msg.sender_id && msg.sender_id.profile) {
+          try {
+            msg.sender_id.profile = await getFileUrl(msg.sender_id.profile);
+          } catch (urlError) {
+            console.error("Error getting file URL:", urlError);
+            // Keep original path if URL generation fails
+          }
+        }
+        return msg;
+      })
+    );
+
     // Mark messages as read if current user is the receiver
-    const unreadMessageIds = messages
+    const unreadMessageIds = messagesWithUrls
       .filter(
         (msg) =>
           !msg.is_read &&
@@ -249,7 +291,7 @@ const getMessages = async (req, res) => {
       success: true,
       message: 'Messages retrieved successfully',
       data: {
-        messages,
+        messages: messagesWithUrls,
         pagination: {
           page: pageNum,
           limit: limitNum,
@@ -504,6 +546,17 @@ const testSendMessage = async (req, res) => {
     await chatMessage.save();
     await chatMessage.populate('sender_id', 'name email profile');
 
+    // Convert profile image path to signed URL
+    let senderProfileUrl = chatMessage.sender_id.profile || null;
+    if (senderProfileUrl) {
+      try {
+        senderProfileUrl = await getFileUrl(senderProfileUrl);
+      } catch (urlError) {
+        console.error("Error getting file URL:", urlError);
+        // Keep original path if URL generation fails
+      }
+    }
+
     // Get Socket.IO instance and emit to room
     const io = req.app.get('io');
     if (io) {
@@ -519,7 +572,7 @@ const testSendMessage = async (req, res) => {
           _id: chatMessage.sender_id._id,
           name: chatMessage.sender_id.name,
           email: chatMessage.sender_id.email,
-          profile: chatMessage.sender_id.profile,
+          profile: senderProfileUrl,
         },
         sender_role: chatMessage.sender_role,
         attachment: chatMessage.attachment,
@@ -543,7 +596,7 @@ const testSendMessage = async (req, res) => {
             _id: chatMessage.sender_id._id,
             name: chatMessage.sender_id.name,
             email: chatMessage.sender_id.email,
-            profile: chatMessage.sender_id.profile,
+            profile: senderProfileUrl,
           },
           sender_role: chatMessage.sender_role,
           is_read: chatMessage.is_read,

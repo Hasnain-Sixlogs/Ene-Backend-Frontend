@@ -1,6 +1,6 @@
 const User = require("../models/user.model");
 const bcrypt = require("bcryptjs");
-const { processUploadedFile } = require("../utils/fileUpload");
+const { processUploadedFile, getFileUrl } = require("../utils/fileUpload");
 
 /**
  * Update Profile Information
@@ -64,10 +64,21 @@ const updateProfile = async (req, res) => {
       });
     }
 
+    // Convert profile image path to signed URL if needed
+    let userObj = user.toObject();
+    if (userObj.profile) {
+      try {
+        userObj.profile = await getFileUrl(userObj.profile);
+      } catch (urlError) {
+        console.error("Error getting file URL:", urlError);
+        // Keep original path if URL generation fails
+      }
+    }
+
     res.json({
       success: true,
       message: "Profile updated successfully",
-      data: user,
+      data: userObj,
     });
   } catch (error) {
     console.error("Update profile error:", error);
@@ -267,9 +278,20 @@ const getSettings = async (req, res) => {
       });
     }
 
+    // Convert profile image path to signed URL if needed
+    let userObj = user.toObject();
+    if (userObj.profile) {
+      try {
+        userObj.profile = await getFileUrl(userObj.profile);
+      } catch (urlError) {
+        console.error("Error getting file URL:", urlError);
+        // Keep original path if URL generation fails
+      }
+    }
+
     res.json({
       success: true,
-      data: user,
+      data: userObj,
     });
   } catch (error) {
     console.error("Get settings error:", error);

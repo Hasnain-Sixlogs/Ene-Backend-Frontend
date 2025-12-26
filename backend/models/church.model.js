@@ -45,6 +45,10 @@ const churchSchema = new mongoose.Schema({
   approve_status: {
     type: Number,
     default: 0 // 0: pending, 1: rejected, 2: approved
+  },
+  image: {
+    type: String,
+    default: null
   }
 }, {
   timestamps: true
