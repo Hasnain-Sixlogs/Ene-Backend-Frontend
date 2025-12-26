@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Chat = require('../models/chat.model');
 const User = require('../models/user.model');
 const { getFileUrl } = require('../utils/fileUpload');
+const logger = require('../utils/logger');
 
 // Store active users and their socket IDs
 const activeUsers = new Map(); // userId -> socketId
@@ -24,20 +25,26 @@ const setupUserAdminChatHandlers = (io) => {
     try {
       const token =
         socket.handshake.auth.token ||
-        socket.handshake.headers.authorization?.split(' ')[1];
+        socket.handshake.headers.authorization;
 
+      logger.debug("Socket authentication token received:", token);
+      logger.debug("Socket authentication token received:", socket.handshake.auth);
+      logger.debug("Socket authentication token received:", socket.handshake.headers);
+      logger.debug("Socket authentication token received:", socket.handshake.headers.authorization);
       if (!token) {
         return next(new Error('Authentication error: No token provided'));
       }
 
+      logger.debug("Socket authentication token received");
       const jwt = require('jsonwebtoken');
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       const user = await User.findById(decoded.id).select('-password');
-
+      logger.debug("User found:", user?._id);
       if (!user) {
         return next(new Error('Authentication error: User not found'));
       }
 
+      logger.debug("User deleted_at status:", user.deleted_at);
       if (user.deleted_at) {
         return next(new Error('Authentication error: User account is deleted'));
       }
@@ -45,14 +52,16 @@ const setupUserAdminChatHandlers = (io) => {
       socket.userId = user._id.toString();
       socket.user = user;
       socket.userRole = user.role;
+      logger.debug("Socket user role:", socket.userRole);
       next();
     } catch (error) {
+      logger.error("Socket authentication error:", error.message);
       next(new Error('Authentication error: Invalid token'));
     }
   });
 
   io.on('connection', (socket) => {
-    console.log(`User connected: ${socket.userId} (${socket.userRole})`);
+    logger.socket(`User connected: ${socket.userId} (${socket.userRole})`);
 
     // Store user connection
     activeUsers.set(socket.userId, socket.id);
@@ -64,7 +73,7 @@ const setupUserAdminChatHandlers = (io) => {
     // If admin, join admin room
     if (socket.userRole === 'admin') {
       socket.join('admin_room');
-      console.log(`Admin ${socket.userId} joined admin room`);
+      logger.socket(`Admin ${socket.userId} joined admin room`);
     }
 
     // ============================================
@@ -149,7 +158,7 @@ const setupUserAdminChatHandlers = (io) => {
           userId: socket.userRole === 'admin' ? user_id : admin_id,
         });
       } catch (error) {
-        console.error('Join chat error:', error);
+        logger.error('Join chat error:', error);
         socket.emit('chat:error', {
           error: error.message || 'Error joining chat',
         });
@@ -237,7 +246,7 @@ const setupUserAdminChatHandlers = (io) => {
           try {
             senderProfileUrl = await getFileUrl(senderProfileUrl);
           } catch (urlError) {
-            console.error("Error getting file URL:", urlError);
+            logger.error("Error getting file URL:", urlError);
             // Keep original path if URL generation fails
           }
         }
@@ -294,7 +303,7 @@ const setupUserAdminChatHandlers = (io) => {
           message: chatMessage.message,
         });
       } catch (error) {
-        console.error('Send message error:', error);
+        logger.error('Send message error:', error);
         socket.emit('chat:error', {
           error: error.message || 'Error sending message',
         });
@@ -331,7 +340,7 @@ const setupUserAdminChatHandlers = (io) => {
           isTyping: isTyping || false,
         });
       } catch (error) {
-        console.error('Typing indicator error:', error);
+        logger.error('Typing indicator error:', error);
       }
     });
 
@@ -390,7 +399,7 @@ const setupUserAdminChatHandlers = (io) => {
 
         socket.emit('chat:read_confirmed');
       } catch (error) {
-        console.error('Mark read error:', error);
+        logger.error('Mark read error:', error);
         socket.emit('chat:error', {
           error: error.message || 'Error marking messages as read',
         });
@@ -421,7 +430,7 @@ const setupUserAdminChatHandlers = (io) => {
     // DISCONNECT HANDLER
     // ============================================
     socket.on('disconnect', () => {
-      console.log(`User disconnected: ${socket.userId}`);
+      logger.socket(`User disconnected: ${socket.userId}`);
 
       // Remove from active users
       activeUsers.delete(socket.userId);

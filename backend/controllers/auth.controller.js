@@ -9,9 +9,19 @@ const generateOTP = () => {
   return 1234;
 };
 
-const sendOTP = async (mobile, otp) => {
-  // TODO: Integrate with SMS service (Twilio, AWS SNS, etc.)
-  console.log(`OTP for ${mobile}: ${otp}`);
+const sendOTP = async (email, otp) => {
+  // TODO: Integrate with email service (Twilio Sendgrid)
+  console.log(`OTP for ${email}: ${otp}`);
+  const sgMail = require('@sendgrid/mail');
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+  const msg = {
+    to: email,
+    from: 'no-reply@everynationeducation.org',
+    subject: 'Your OTP for verification',
+    text: `Your OTP is ${otp}`,
+  };
+  await sgMail.send(msg);
+  console.log('OTP sent to email');
   return true;
 };
 
@@ -110,7 +120,7 @@ const signup = async (req, res) => {
     await user.save();
 
     // Send OTP
-    await sendOTP(mobile, otp);
+    await sendOTP(email, otp);
 
     // Return user data (without password and OTP)
     const userObj = user.toObject();
@@ -513,7 +523,7 @@ const forgotPassword = async (req, res) => {
 
     // Send OTP via SMS or Email
     if (user.mobile) {
-      await sendOTP(user.mobile, otp);
+      await sendOTP(user.email, otp);
     }
     // TODO: Send email if email exists
 

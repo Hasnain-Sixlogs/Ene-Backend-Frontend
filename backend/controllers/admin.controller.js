@@ -564,7 +564,7 @@ const getSurveyResults = async (req, res) => {
     const totalNotSure = await User.countDocuments({
       $or: [
         {
-          lord_accepted: `No "I still have Questions"`,
+          lord_accepted: `Not Sure`,
         },
         { lord_accepted: { $exists: false } },
         { lord_accepted: null },

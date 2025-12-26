@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Video = require('../models/video.model');
 const User = require('../models/user.model');
+const { getFileUrl } = require('../utils/fileUpload');
 
 // ==================== ADMIN ENDPOINTS ====================
 
@@ -117,30 +118,44 @@ const getAllVideosAdmin = async (req, res) => {
     // Get total count
     const total = await Video.countDocuments(filter);
 
-    // Format response
-    const formattedVideos = videos.map((video, index) => ({
-      sno: skip + index + 1,
-      _id: video._id,
-      title: video.title,
-      category: video.category,
-      videoUrl: video.video_url,
-      thumbnailUrl: video.thumbnail_url,
-      description: video.description,
-      duration: video.duration,
-      views: video.views,
-      status: video.status,
-      uploadDate: video.createdAt,
-      uploadedBy: video.uploaded_by
-        ? {
-            _id: video.uploaded_by._id,
-            name: video.uploaded_by.name,
-            email: video.uploaded_by.email,
-            profile: video.uploaded_by.profile,
+    // Format response with signed URLs for profiles
+    const formattedVideos = await Promise.all(
+      videos.map(async (video, index) => {
+        let profileUrl = video.uploaded_by?.profile || null;
+        if (profileUrl) {
+          try {
+            profileUrl = await getFileUrl(profileUrl);
+          } catch (urlError) {
+            console.error("Error getting file URL:", urlError);
+            // Keep original path if URL generation fails
           }
-        : null,
-      createdAt: video.createdAt,
-      updatedAt: video.updatedAt,
-    }));
+        }
+
+        return {
+          sno: skip + index + 1,
+          _id: video._id,
+          title: video.title,
+          category: video.category,
+          videoUrl: video.video_url,
+          thumbnailUrl: video.thumbnail_url,
+          description: video.description,
+          duration: video.duration,
+          views: video.views,
+          status: video.status,
+          uploadDate: video.createdAt,
+          uploadedBy: video.uploaded_by
+            ? {
+                _id: video.uploaded_by._id,
+                name: video.uploaded_by.name,
+                email: video.uploaded_by.email,
+                profile: profileUrl,
+              }
+            : null,
+          createdAt: video.createdAt,
+          updatedAt: video.updatedAt,
+        };
+      })
+    );
 
     res.json({
       success: true,
@@ -185,6 +200,17 @@ const getVideoByIdAdmin = async (req, res) => {
       });
     }
 
+    // Convert profile image path to signed URL
+    let profileUrl = video.uploaded_by?.profile || null;
+    if (profileUrl) {
+      try {
+        profileUrl = await getFileUrl(profileUrl);
+      } catch (urlError) {
+        console.error("Error getting file URL:", urlError);
+        // Keep original path if URL generation fails
+      }
+    }
+
     res.json({
       success: true,
       message: 'Video retrieved successfully',
@@ -205,7 +231,7 @@ const getVideoByIdAdmin = async (req, res) => {
                 _id: video.uploaded_by._id,
                 name: video.uploaded_by.name,
                 email: video.uploaded_by.email,
-                profile: video.uploaded_by.profile,
+                profile: profileUrl,
               }
             : null,
           createdAt: video.createdAt,
@@ -272,6 +298,17 @@ const createVideo = async (req, res) => {
     await video.save();
     await video.populate('uploaded_by', 'name email profile');
 
+    // Convert profile image path to signed URL
+    let profileUrl = video.uploaded_by?.profile || null;
+    if (profileUrl) {
+      try {
+        profileUrl = await getFileUrl(profileUrl);
+      } catch (urlError) {
+        console.error("Error getting file URL:", urlError);
+        // Keep original path if URL generation fails
+      }
+    }
+
     res.status(201).json({
       success: true,
       message: 'Video created successfully',
@@ -292,7 +329,7 @@ const createVideo = async (req, res) => {
                 _id: video.uploaded_by._id,
                 name: video.uploaded_by.name,
                 email: video.uploaded_by.email,
-                profile: video.uploaded_by.profile,
+                profile: profileUrl,
               }
             : null,
           createdAt: video.createdAt,
@@ -366,6 +403,17 @@ const updateVideo = async (req, res) => {
       });
     }
 
+    // Convert profile image path to signed URL
+    let profileUrl = video.uploaded_by?.profile || null;
+    if (profileUrl) {
+      try {
+        profileUrl = await getFileUrl(profileUrl);
+      } catch (urlError) {
+        console.error("Error getting file URL:", urlError);
+        // Keep original path if URL generation fails
+      }
+    }
+
     res.json({
       success: true,
       message: 'Video updated successfully',
@@ -386,7 +434,7 @@ const updateVideo = async (req, res) => {
                 _id: video.uploaded_by._id,
                 name: video.uploaded_by.name,
                 email: video.uploaded_by.email,
-                profile: video.uploaded_by.profile,
+                profile: profileUrl,
               }
             : null,
           createdAt: video.createdAt,
@@ -554,26 +602,40 @@ const getAllVideos = async (req, res) => {
     // Get total count
     const total = await Video.countDocuments(filter);
 
-    // Format response
-    const formattedVideos = videos.map((video) => ({
-      _id: video._id,
-      title: video.title,
-      category: video.category,
-      videoUrl: video.video_url,
-      thumbnailUrl: video.thumbnail_url,
-      description: video.description,
-      duration: video.duration,
-      views: video.views,
-      uploadDate: video.createdAt,
-      uploadedBy: video.uploaded_by
-        ? {
-            _id: video.uploaded_by._id,
-            name: video.uploaded_by.name,
-            profile: video.uploaded_by.profile,
+    // Format response with signed URLs for profiles
+    const formattedVideos = await Promise.all(
+      videos.map(async (video) => {
+        let profileUrl = video.uploaded_by?.profile || null;
+        if (profileUrl) {
+          try {
+            profileUrl = await getFileUrl(profileUrl);
+          } catch (urlError) {
+            console.error("Error getting file URL:", urlError);
+            // Keep original path if URL generation fails
           }
-        : null,
-      createdAt: video.createdAt,
-    }));
+        }
+
+        return {
+          _id: video._id,
+          title: video.title,
+          category: video.category,
+          videoUrl: video.video_url,
+          thumbnailUrl: video.thumbnail_url,
+          description: video.description,
+          duration: video.duration,
+          views: video.views,
+          uploadDate: video.createdAt,
+          uploadedBy: video.uploaded_by
+            ? {
+                _id: video.uploaded_by._id,
+                name: video.uploaded_by.name,
+                profile: profileUrl,
+              }
+            : null,
+          createdAt: video.createdAt,
+        };
+      })
+    );
 
     res.json({
       success: true,
@@ -619,6 +681,17 @@ const getVideoById = async (req, res) => {
       });
     }
 
+    // Convert profile image path to signed URL
+    let profileUrl = video.uploaded_by?.profile || null;
+    if (profileUrl) {
+      try {
+        profileUrl = await getFileUrl(profileUrl);
+      } catch (urlError) {
+        console.error("Error getting file URL:", urlError);
+        // Keep original path if URL generation fails
+      }
+    }
+
     res.json({
       success: true,
       message: 'Video retrieved successfully',
@@ -637,7 +710,7 @@ const getVideoById = async (req, res) => {
             ? {
                 _id: video.uploaded_by._id,
                 name: video.uploaded_by.name,
-                profile: video.uploaded_by.profile,
+                profile: profileUrl,
               }
             : null,
           createdAt: video.createdAt,

@@ -2,6 +2,7 @@ const adminChatService = require('../services/adminChatService');
 const userPasterChatService = require('../services/userPasterChatService');
 const communityChatService = require('../services/communityChatService');
 const User = require('../models/user.model');
+const logger = require('../utils/logger');
 
 // Store active users and their socket IDs
 const activeUsers = new Map(); // userId -> socketId
@@ -36,7 +37,7 @@ const setupChatHandlers = (io) => {
   });
 
   io.on('connection', (socket) => {
-    console.log(`User connected: ${socket.userId}`);
+    logger.socket(`User connected: ${socket.userId}`);
 
     // Store user connection
     activeUsers.set(socket.userId, socket.id);
@@ -305,7 +306,7 @@ const setupChatHandlers = (io) => {
     // ============================================
 
     socket.on('disconnect', () => {
-      console.log(`User disconnected: ${socket.userId}`);
+      logger.socket(`User disconnected: ${socket.userId}`);
       
       // Remove from active users
       activeUsers.delete(socket.userId);

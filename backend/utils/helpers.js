@@ -1,6 +1,7 @@
 const User = require("../models/user.model");
 const ChurchList = require("../models/church.model");
 const UserCommunity = require("../models/userCommunity.model");
+const { getFileUrl } = require("../utils/fileUpload");
 
 // Get user profile with church details
 const getUserProfile = async (userId) => {
@@ -12,6 +13,16 @@ const getUserProfile = async (userId) => {
     }
 
     const userObj = userData.toObject();
+
+    // Convert profile image path to signed URL
+    if (userObj.profile) {
+      try {
+        userObj.profile = await getFileUrl(userObj.profile);
+      } catch (urlError) {
+        console.error("Error getting file URL:", urlError);
+        // Keep original path if URL generation fails
+      }
+    }
 
     if (userData.isPastor === 1) {
       if (userData.church_id) {

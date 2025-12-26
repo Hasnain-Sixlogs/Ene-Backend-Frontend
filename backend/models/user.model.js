@@ -57,7 +57,7 @@ const userSchema = new mongoose.Schema(
     },
     lord_accepted: {
       type: String,
-      default: `No "I still have Questions"`,
+      default: `Not Sure`,
     },
     otp: {
       type: Number,

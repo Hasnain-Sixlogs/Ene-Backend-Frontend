@@ -63,7 +63,9 @@ module.exports = {
       profile: {
         type: 'string',
         nullable: true,
-        example: 'https://example.com/profile.jpg'
+        format: 'uri',
+        example: 'https://storage.googleapis.com/bucket/profiles/1234567890-image.jpg?X-Goog-Signature=...',
+        description: 'Profile image signed URL (generated on-demand, expires after 7 days for GCS or permanent for local storage)'
       },
       location: {
         type: 'object',
@@ -477,8 +479,9 @@ module.exports = {
       profile: {
         type: 'string',
         nullable: true,
-        example: 'https://example.com/profile.jpg',
-        description: 'Profile image URL'
+        format: 'uri',
+        example: 'https://storage.googleapis.com/bucket/profiles/1234567890-image.jpg?X-Goog-Signature=...',
+        description: 'Profile image signed URL (generated on-demand, expires after 7 days for GCS or permanent for local storage). Upload via multipart/form-data with field name "profile".'
       },
       location: {
         type: 'object',
@@ -1843,7 +1846,9 @@ module.exports = {
       profile: {
         type: 'string',
         nullable: true,
-        example: 'https://example.com/profile.jpg'
+        format: 'uri',
+        example: 'https://storage.googleapis.com/bucket/profiles/1234567890-image.jpg?X-Goog-Signature=...',
+        description: 'Profile image signed URL (generated on-demand, expires after 7 days for GCS or permanent for local storage)'
       },
       location: {
         type: 'object',
@@ -2317,7 +2322,13 @@ module.exports = {
           _id: { type: 'string', example: '507f1f77bcf86cd799439013' },
           name: { type: 'string', example: 'Admin User' },
           email: { type: 'string', example: 'admin@example.com' },
-          profile: { type: 'string', nullable: true, example: 'https://example.com/profile.jpg' }
+          profile: { 
+            type: 'string', 
+            nullable: true, 
+            format: 'uri',
+            example: 'https://storage.googleapis.com/bucket/profiles/1234567890-image.jpg?X-Goog-Signature=...',
+            description: 'Profile image signed URL (generated on-demand)'
+          }
         }
       },
       sender_role: { type: 'string', enum: ['user', 'admin'], example: 'admin' },
@@ -2335,11 +2346,23 @@ module.exports = {
       userId: { type: 'string', example: '507f1f77bcf86cd799439011', description: 'For admin: user ID, For user: not present' },
       userName: { type: 'string', example: 'John Doe', description: 'For admin: user name, For user: not present' },
       userEmail: { type: 'string', example: 'john@example.com', description: 'For admin: user email, For user: not present' },
-      userProfile: { type: 'string', nullable: true, example: 'https://example.com/profile.jpg', description: 'For admin: user profile, For user: not present' },
+      userProfile: { 
+        type: 'string', 
+        nullable: true, 
+        format: 'uri',
+        example: 'https://storage.googleapis.com/bucket/profiles/1234567890-image.jpg?X-Goog-Signature=...', 
+        description: 'For admin: user profile signed URL (generated on-demand), For user: not present' 
+      },
       adminId: { type: 'string', example: '507f1f77bcf86cd799439013', description: 'For user: admin ID, For admin: not present' },
       adminName: { type: 'string', example: 'Admin User', description: 'For user: admin name, For admin: not present' },
       adminEmail: { type: 'string', example: 'admin@example.com', description: 'For user: admin email, For admin: not present' },
-      adminProfile: { type: 'string', nullable: true, example: 'https://example.com/admin.jpg', description: 'For user: admin profile, For admin: not present' },
+      adminProfile: { 
+        type: 'string', 
+        nullable: true, 
+        format: 'uri',
+        example: 'https://storage.googleapis.com/bucket/profiles/1234567890-image.jpg?X-Goog-Signature=...', 
+        description: 'For user: admin profile signed URL (generated on-demand), For admin: not present' 
+      },
       lastMessage: {
         type: 'object',
         properties: {
@@ -2452,7 +2475,13 @@ module.exports = {
                   _id: { type: 'string', example: '507f1f77bcf86cd799439013' },
                   name: { type: 'string', example: 'Admin User' },
                   email: { type: 'string', example: 'admin@example.com' },
-                  profile: { type: 'string', nullable: true, example: 'https://example.com/profile.jpg' }
+                  profile: { 
+                    type: 'string', 
+                    nullable: true, 
+                    format: 'uri',
+                    example: 'https://storage.googleapis.com/bucket/profiles/1234567890-image.jpg?X-Goog-Signature=...',
+                    description: 'Profile image signed URL (generated on-demand)'
+                  }
                 }
               },
               sender_role: { type: 'string', enum: ['user', 'admin'], example: 'admin' },
@@ -2560,7 +2589,13 @@ module.exports = {
           _id: { type: 'string', example: '507f1f77bcf86cd799439012' },
           name: { type: 'string', example: 'Admin User' },
           email: { type: 'string', nullable: true, example: 'admin@example.com' },
-          profile: { type: 'string', nullable: true, example: 'https://example.com/profile.jpg' }
+          profile: { 
+            type: 'string', 
+            nullable: true, 
+            format: 'uri',
+            example: 'https://storage.googleapis.com/bucket/profiles/1234567890-image.jpg?X-Goog-Signature=...',
+            description: 'Profile image signed URL (generated on-demand)'
+          }
         }
       },
       createdAt: { type: 'string', format: 'date-time', example: '2024-01-15T00:00:00.000Z' },
@@ -2588,7 +2623,13 @@ module.exports = {
         properties: {
           _id: { type: 'string', example: '507f1f77bcf86cd799439012' },
           name: { type: 'string', example: 'Admin User' },
-          profile: { type: 'string', nullable: true, example: 'https://example.com/profile.jpg' }
+          profile: { 
+            type: 'string', 
+            nullable: true, 
+            format: 'uri',
+            example: 'https://storage.googleapis.com/bucket/profiles/1234567890-image.jpg?X-Goog-Signature=...',
+            description: 'Profile image signed URL (generated on-demand)'
+          }
         }
       },
       createdAt: { type: 'string', format: 'date-time', example: '2024-01-15T00:00:00.000Z' }

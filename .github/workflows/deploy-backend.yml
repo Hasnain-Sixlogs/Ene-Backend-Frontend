@@ -79,6 +79,6 @@ jobs:
             --min-instances 0 \
             --vpc-connector cloudrun-connector \
             --vpc-egress private-ranges-only \
-            --set-env-vars "NODE_ENV=production,MONGODB_URI=${{ secrets.MONGODB_URI }},JWT_SECRET=${{ secrets.JWT_SECRET }},CORS_ORIGIN=${{ secrets.CORS_ORIGIN }},ImageUploadOnGCS=1,GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }},GCS_BUCKET_NAME=${{ secrets.GCS_BUCKET_NAME }},BASE_URL=${{ secrets.BACKEND_URL }},MAX_FILE_SIZE=10485760" \
+            --set-env-vars "NODE_ENV=production,MONGODB_URI=${{ secrets.MONGODB_URI }},JWT_SECRET=${{ secrets.JWT_SECRET }},CORS_ORIGIN=${{ secrets.CORS_ORIGIN }},ImageUploadOnGCS=1,GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }},GCS_BUCKET_NAME=${{ secrets.GCS_BUCKET_NAME }},BASE_URL=${{ secrets.BACKEND_URL }},MAX_FILE_SIZE=10485760,SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }}" \
             --remove-secrets=/app/config/gcp-service-account.json,/app/secrets/gcp-service-account.json \
             --service-account ${{ secrets.GCP_SA_EMAIL }}
