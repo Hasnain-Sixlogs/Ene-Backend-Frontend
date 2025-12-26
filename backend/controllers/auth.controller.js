@@ -771,10 +771,23 @@ const updateProfile = async (req, res) => {
         message: "User not found",
       });
     }
+
+    // Convert profile image path to signed URL if needed
+    const { getFileUrl } = require("../utils/fileUpload");
+    let userObj = updatedUser.toObject();
+    if (userObj.profile) {
+      try {
+        userObj.profile = await getFileUrl(userObj.profile);
+      } catch (urlError) {
+        console.error("Error getting file URL:", urlError);
+        // Keep original path if URL generation fails
+      }
+    }
+
     res.json({
       success: true,
       message: "Profile updated successfully",
-      data: updatedUser,
+      data: userObj,
     });
   } catch (error) {
     console.error("Update profile error:", error);

@@ -74,6 +74,17 @@ const adminSignin = async (req, res) => {
     delete adminObj.otp;
     delete adminObj.refresh_token;
 
+    // Convert profile image path to signed URL if needed
+    const { getFileUrl } = require("../utils/fileUpload");
+    if (adminObj.profile) {
+      try {
+        adminObj.profile = await getFileUrl(adminObj.profile);
+      } catch (urlError) {
+        console.error("Error getting file URL:", urlError);
+        // Keep original path if URL generation fails
+      }
+    }
+
     res.json({
       success: true,
       message: "Admin login successful",
@@ -220,11 +231,23 @@ const getAdminMe = async (req, res) => {
       });
     }
 
+    // Convert profile image path to signed URL if needed
+    const { getFileUrl } = require("../utils/fileUpload");
+    let adminObj = admin.toObject();
+    if (adminObj.profile) {
+      try {
+        adminObj.profile = await getFileUrl(adminObj.profile);
+      } catch (urlError) {
+        console.error("Error getting file URL:", urlError);
+        // Keep original path if URL generation fails
+      }
+    }
+
     res.json({
       success: true,
       message: "Admin info retrieved successfully",
       data: {
-        admin,
+        admin: adminObj,
       },
     });
   } catch (error) {
@@ -733,19 +756,36 @@ const getAllUsers = async (req, res) => {
     // Get total count
     const total = await User.countDocuments(filter);
 
+    // Convert profile image paths to signed URLs
+    const { getFileUrl } = require("../utils/fileUpload");
+    
     // Format users for response
-    const formattedUsers = users.map((user, index) => ({
-      sno: skip + index + 1,
-      _id: user._id,
-      image: user.profile || null,
-      name: user.name,
-      email: user.email || "N/A",
-      mobileNumber: user.mobile || "N/A",
-      location: user.location?.address || "N/A",
-      city: user.location?.city || "N/A",
-      social_type: user.social_type || "email",
-      createdAt: user.createdAt,
-    }));
+    const formattedUsers = await Promise.all(
+      users.map(async (user, index) => {
+        let imageUrl = user.profile || null;
+        if (imageUrl) {
+          try {
+            imageUrl = await getFileUrl(imageUrl);
+          } catch (urlError) {
+            console.error("Error getting file URL:", urlError);
+            // Keep original path if URL generation fails
+          }
+        }
+        
+        return {
+          sno: skip + index + 1,
+          _id: user._id,
+          image: imageUrl,
+          name: user.name,
+          email: user.email || "N/A",
+          mobileNumber: user.mobile || "N/A",
+          location: user.location?.address || "N/A",
+          city: user.location?.city || "N/A",
+          social_type: user.social_type || "email",
+          createdAt: user.createdAt,
+        };
+      })
+    );
 
     res.json({
       success: true,
@@ -791,11 +831,23 @@ const getUserById = async (req, res) => {
       });
     }
 
+    // Convert profile image path to signed URL if needed
+    const { getFileUrl } = require("../utils/fileUpload");
+    let userObj = user.toObject();
+    if (userObj.profile) {
+      try {
+        userObj.profile = await getFileUrl(userObj.profile);
+      } catch (urlError) {
+        console.error("Error getting file URL:", urlError);
+        // Keep original path if URL generation fails
+      }
+    }
+
     res.json({
       success: true,
       message: "User retrieved successfully",
       data: {
-        user,
+        user: userObj,
       },
     });
   } catch (error) {

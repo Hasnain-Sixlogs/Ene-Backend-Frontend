@@ -1,4 +1,5 @@
 const Church = require("../models/church.model");
+const { processUploadedFile, getFileUrl } = require("../utils/fileUpload");
 
 const createChurch = async (req, res) => {
   try {
@@ -32,6 +33,21 @@ const createChurch = async (req, res) => {
       });
     }
 
+    // Handle image upload
+    let imagePath = null;
+    if (req.file) {
+      try {
+        imagePath = await processUploadedFile(req.file, 'churches');
+      } catch (uploadError) {
+        console.error("Church image upload error:", uploadError);
+        return res.status(500).json({
+          success: false,
+          message: "Error uploading church image",
+          error: process.env.NODE_ENV === "development" ? uploadError.message : undefined,
+        });
+      }
+    }
+
     // Create church with pending approval status
     const church = new Church({
       user_id: userId,
@@ -44,6 +60,7 @@ const createChurch = async (req, res) => {
       },
       place_id: place_id || null,
       approve_status: 0, // 0: pending approval
+      image: imagePath,
     });
 
     await church.save();
@@ -108,6 +125,22 @@ const getAllChurches = async (req, res) => {
       .skip(skip)
       .limit(limitNum);
 
+    // Convert image paths to signed URLs
+    const churchesWithUrls = await Promise.all(
+      churches.map(async (church) => {
+        const churchObj = church.toObject();
+        if (churchObj.image) {
+          try {
+            churchObj.image = await getFileUrl(churchObj.image);
+          } catch (urlError) {
+            console.error("Error getting file URL:", urlError);
+            // Keep original path if URL generation fails
+          }
+        }
+        return churchObj;
+      })
+    );
+
     // Get total count
     const total = await Church.countDocuments(filter);
 
@@ -115,7 +148,7 @@ const getAllChurches = async (req, res) => {
       success: true,
       message: "Churches retrieved successfully",
       data: {
-        churches,
+        churches: churchesWithUrls,
         pagination: {
           page: pageNum,
           limit: limitNum,
@@ -161,11 +194,22 @@ const getChurchById = async (req, res) => {
     //   });
     // }
 
+    // Convert image path to signed URL
+    let churchObj = church.toObject();
+    if (churchObj.image) {
+      try {
+        churchObj.image = await getFileUrl(churchObj.image);
+      } catch (urlError) {
+        console.error("Error getting file URL:", urlError);
+        // Keep original path if URL generation fails
+      }
+    }
+
     res.json({
       success: true,
       message: "Church retrieved successfully",
       data: {
-        church,
+        church: churchObj,
       },
     });
   } catch (error) {
@@ -218,6 +262,87 @@ const deleteChurch = async (req, res) => {
   }
 };
 
+const updateChurch = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, location, place_id } = req.body;
+    const userId = req.user?.id || req.user?._id;
+
+    const church = await Church.findById(id);
+    if (!church) {
+      return res.status(404).json({
+        success: false,
+        message: "Church not found",
+      });
+    }
+
+    // Check if the church belongs to the user
+    const churchUserId =
+      church.user_id?.toString() || church.user_id?._id?.toString();
+    if (churchUserId !== userId?.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "You don't have permission to update this church",
+      });
+    }
+
+    // Update fields
+    if (name) church.name = name;
+    if (location) {
+      if (location.address) church.location.address = location.address;
+      if (location.city) church.location.city = location.city;
+      if (location.coordinates) {
+        church.location.coordinates = location.coordinates;
+      }
+    }
+    if (place_id !== undefined) church.place_id = place_id;
+
+    // Handle image upload
+    if (req.file) {
+      try {
+        const imagePath = await processUploadedFile(req.file, 'churches');
+        if (imagePath) {
+          church.image = imagePath;
+        }
+      } catch (uploadError) {
+        console.error("Church image upload error:", uploadError);
+        return res.status(500).json({
+          success: false,
+          message: "Error uploading church image",
+          error: process.env.NODE_ENV === "development" ? uploadError.message : undefined,
+        });
+      }
+    }
+
+    await church.save();
+
+    // Convert image path to signed URL
+    let churchObj = church.toObject();
+    if (churchObj.image) {
+      try {
+        churchObj.image = await getFileUrl(churchObj.image);
+      } catch (urlError) {
+        console.error("Error getting file URL:", urlError);
+      }
+    }
+
+    res.json({
+      success: true,
+      message: "Church updated successfully",
+      data: {
+        church: churchObj,
+      },
+    });
+  } catch (error) {
+    console.error("Update church error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error updating church",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
+  }
+};
+
 const updateChurchStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -248,5 +373,6 @@ module.exports = {
   getAllChurches,
   getChurchById,
   deleteChurch,
+  updateChurch,
   updateChurchStatus,
 };

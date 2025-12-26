@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Chat = require('../models/chat.model');
 const User = require('../models/user.model');
+const { getFileUrl } = require('../utils/fileUpload');
 
 // Store active users and their socket IDs
 const activeUsers = new Map(); // userId -> socketId
@@ -230,6 +231,17 @@ const setupUserAdminChatHandlers = (io) => {
         // Populate sender information
         await chatMessage.populate('sender_id', 'name email profile');
 
+        // Convert profile image path to signed URL
+        let senderProfileUrl = chatMessage.sender_id.profile || null;
+        if (senderProfileUrl) {
+          try {
+            senderProfileUrl = await getFileUrl(senderProfileUrl);
+          } catch (urlError) {
+            console.error("Error getting file URL:", urlError);
+            // Keep original path if URL generation fails
+          }
+        }
+
         // Get room ID
         const roomId = getRoomId(user_id, admin_id);
 
@@ -243,7 +255,7 @@ const setupUserAdminChatHandlers = (io) => {
             _id: chatMessage.sender_id._id,
             name: chatMessage.sender_id.name,
             email: chatMessage.sender_id.email,
-            profile: chatMessage.sender_id.profile,
+            profile: senderProfileUrl,
           },
           sender_role: chatMessage.sender_role,
           attachment: chatMessage.attachment,
